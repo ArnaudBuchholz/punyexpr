@@ -1,0 +1,1 @@
+!function(n){"use strict";var e="string";const i=[e,e,"number"],r=new RegExp("'((?:[^'\\]|\\.)*)'|\"((?:[^\"\\]|\\.)*)\"|c","g");e=n=>{};e.tokenize=n=>{const t=[];return n.replace(r,(n,...e)=>{var r=e.findIndex(n=>void 0!==n);t.push([i[r],e[r]])})},n.punyexpr=e}(this||global);
