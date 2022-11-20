@@ -27,10 +27,11 @@ describe('tokenizer', () => {
       '+.123': ['number', 0.123],
       '.123': ['number', 0.123],
 
-      'true': ['boolean', true],
-      'false': ['boolean', false],
+      true: ['boolean', true],
+      false: ['boolean', false],
 
-      '"': ['unknown', '"']
+      '"': ['unknown', '"'],
+      '"123': ['unknown', '"123']
     }
     Object.keys(basic).forEach(text => {
       const token = basic[text]
