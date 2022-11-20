@@ -9,6 +9,7 @@ describe('tokenizer', () => {
       '\'a\\\'b\'': ['string', 'a\'b'],
       '"a"': ['string', 'a'],
       '"a\\"b"': ['string', 'a"b'],
+
       '-1': ['number', -1],
       '-1.0': ['number', -1],
       '-1.': ['number', -1],
@@ -25,6 +26,9 @@ describe('tokenizer', () => {
       '-.123': ['number', -0.123],
       '+.123': ['number', 0.123],
       '.123': ['number', 0.123],
+
+      'true': ['boolean', true],
+      'false': ['boolean', false],
 
       '"': ['unknown', '"']
     }
