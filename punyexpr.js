@@ -1,17 +1,17 @@
 (function (exports) {
   'use strict'
 
-  const TOKEN_REGEXP_SINGLE_QUOTE_STRING = '\'((?:[^\'\\\\]|\\\\.)*)\''
-  const TOKEN_REGEXP_DOUBLE_QUOTE_STRING = '"((?:[^"\\\\]|\\\\.)*)"'
+  const TOKEN_REGEXP_SINGLE_QUOTE_STRING = /'((?:[^'\\]|\\.)*)'/
+  const TOKEN_REGEXP_DOUBLE_QUOTE_STRING = /"((?:[^"\\]|\\.)*)"/
   const TOKEN_TYPE_STRING = 'string'
 
-  const TOKEN_REGEXP_NUMBER = '((?:-|\\+)?(?:\\d+(?:\\.\\d*)?|\\.\\d+))'
+  const TOKEN_REGEXP_NUMBER = /((?:-|\+)?(?:\d+(?:\.\d*)?|\.\d+))/
   const TOKEN_TYPE_NUMBER = 'number'
 
-  const TOKEN_REGEXP_BOOLEAN = '(true|false)'
+  const TOKEN_REGEXP_BOOLEAN = /(true|false)/
   const TOKEN_TYPE_BOOLEAN = 'boolean'
 
-  const TOKEN_REGEXP_UNKNOWN = '(.+)'
+  const TOKEN_REGEXP_UNKNOWN = /(.+)/
   const TOKEN_TYPE_UNKNOWN = 'unknown'
 
   const TOKEN_TYPES = [
@@ -30,7 +30,7 @@
     TOKEN_REGEXP_BOOLEAN,
 
     TOKEN_REGEXP_UNKNOWN
-  ].join('|'), 'g')
+  ].map(re => { const str = re.toString(); return str.substring(1, str.length - 1) }).join('|'), 'g')
 
   const TOKENIZER_CONVERTER = [
     value => value.replace(/\\'/g, '\''), // TOKEN_REGEXP_SINGLE_QUOTE_STRING
