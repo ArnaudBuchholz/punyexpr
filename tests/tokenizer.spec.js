@@ -1,7 +1,5 @@
 'use strict'
 
-const { punyexpr } = require('../punyexpr')
-
 describe('tokenizer', () => {
   const process = tests => {
     Object.keys(tests).forEach(text => {
@@ -26,21 +24,11 @@ describe('tokenizer', () => {
       '"a"': [['string', 'a', 0]],
       '"a\\"b"': [['string', 'a"b', 0]],
 
-      '-1': [['number', -1, 0]],
-      '-1.0': [['number', -1, 0]],
-      '-1.': [['number', -1, 0]],
-      '+1': [['number', 1, 0]],
-      '+1.0': [['number', 1, 0]],
-      '+1.': [['number', 1, 0]],
       1: [['number', 1, 0]],
       '1.0': [['number', 1, 0]],
       '1.': [['number', 1, 0]],
       123: [['number', 123, 0]],
-      '-1.23': [['number', -1.23, 0]],
-      '+1.23': [['number', 1.23, 0]],
       1.23: [['number', 1.23, 0]],
-      '-.123': [['number', -0.123, 0]],
-      '+.123': [['number', 0.123, 0]],
       '.123': [['number', 0.123, 0]],
 
       true: [['boolean', true, 0]],
@@ -66,7 +54,9 @@ describe('tokenizer', () => {
 
   describe('combining', () => {
     process({
-      '1 + 1': [['number', 1, 0], ['symbol', '+', 2], ['number', 1, 4]],
+      '1+1': [['number', 1, 0], ['symbol', '+', 1], ['number', 1, 2]],
+      '1 +  1': [['number', 1, 0], ['symbol', '+', 2], ['number', 1, 5]],
+      '1\t+\n1': [['number', 1, 0], ['symbol', '+', 2], ['number', 1, 4]],
       'items[step].member': [
         ['identifier', 'items', 0],
         ['symbol', '[', 5],
@@ -80,7 +70,8 @@ describe('tokenizer', () => {
 
   describe('error', () => {
     process({
-      '"': new punyexpr.InvalidTokenError(0)
+      '"\'': new punyexpr.InvalidTokenError(0),
+      '9a': new punyexpr.InvalidTokenError(1)
     })
   })
 })
