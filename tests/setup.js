@@ -1,3 +1,8 @@
 'use strict'
 
-require('../punyexpr.js')
+const { punyexpr } = require('../punyexpr.js')
+global.punyexpr = punyexpr
+
+beforeAll(() => {
+  expect(typeof punyexpr).not.toBe('undefined')
+})
