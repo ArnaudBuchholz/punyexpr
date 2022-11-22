@@ -5,7 +5,7 @@
   const TOKEN_REGEXP_DOUBLE_QUOTE_STRING = /"((?:[^"\\]|\\.)*)"/
   const TOKEN_TYPE_STRING = 'string'
 
-  const TOKEN_REGEXP_NUMBER = /((?:-|\+)?(?:\d+(?:\.\d*)?|\.\d+))/
+  const TOKEN_REGEXP_NUMBER = /((?:\d+(?:\.\d*)?|\.\d+))/
   const TOKEN_TYPE_NUMBER = 'number'
 
   const TOKEN_REGEXP_BOOLEAN = /(true|false)/
@@ -17,11 +17,11 @@
   const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.)/
   const TOKEN_TYPE_SYMBOL = 'symbol'
 
-  const TOKEN_REGEXP_SEPARATOR = /(\s+)/
-  const TOKEN_TYPE_SEPARATOR = 'separator'
+  const TOKEN_REGEXP_SEPARATOR = /(\s)/
+  const TOKEN_TYPE_SEPARATOR = {}
 
-  const TOKEN_REGEXP_UNKNOWN = /(.+)/
-  const TOKEN_TYPE_UNKNOWN = 'unknown'
+  const TOKEN_REGEXP_UNKNOWN = /(.)/
+  const TOKEN_TYPE_UNKNOWN = {}
 
   const TOKEN_TYPES = [
     TOKEN_TYPE_STRING,
@@ -54,38 +54,34 @@
     value => value === 'true' // TOKEN_REGEXP_BOOLEAN
   ]
 
-  const $offset = Symbol('InvalidTokenError::offset')
-
   class InvalidTokenError extends Error {
-    get offset () {
-      return this[$offset]
-    }
-
     constructor (offset) {
       super(`Invalid token @${offset}`)
-      this[$offset] = offset
+      this.offset = offset
     }
   }
 
   const tokenize = (string) => {
     const tokens = []
     let offset = 0
-    let lastTokenType = TOKEN_REGEXP_SEPARATOR
+    let lastTokenType = TOKEN_TYPE_SEPARATOR
+    const separatorLess = [TOKEN_TYPE_SEPARATOR, TOKEN_TYPE_SYMBOL]
     string.replace(TOKENIZER_REGEXP, (match, ...capturedValues) => {
-      const index = capturedValues.findIndex(capturedValue => capturedValue !== undefined)
-      const rawValue = capturedValues[index]
+      const rawType = capturedValues.findIndex(capturedValue => capturedValue !== undefined)
+      const rawValue = capturedValues[rawType]
       let value
-      const converter = TOKENIZER_CONVERTER[index]
+      const converter = TOKENIZER_CONVERTER[rawType]
       if (converter) {
         value = converter(rawValue)
       } else {
         value = rawValue
       }
-      // if (lastTokenType !== TOKEN_REGEXP_SEPARATOR) {
-      //   // error
-      // }
-      lastTokenType = TOKEN_TYPES[index]
-      if (lastTokenType === 'unknown') {
+      const type = TOKEN_TYPES[rawType]
+      if (!separatorLess.includes(type) && !separatorLess.includes(lastTokenType)) {
+        throw new InvalidTokenError(offset)
+      }
+      lastTokenType = TOKEN_TYPES[rawType]
+      if (lastTokenType === TOKEN_TYPE_UNKNOWN) {
         throw new InvalidTokenError(offset)
       }
       tokens.push([lastTokenType, value, offset])
