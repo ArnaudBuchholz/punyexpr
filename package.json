@@ -8,7 +8,7 @@
     "test": "jest",
     "mutate": "stryker run",
     "lint": "standard --fix",
-    "build": "uglifyjs punyexpr.js --compress --mangle -o dist/punyexpr.js"
+    "build": "uglifyjs punyexpr.js --compress --mangle --mangle-props reserved=['op','args','impl','str','tokenize','Error'] -o dist/punyexpr.js"
   },
   "repository": {
     "type": "git",
@@ -37,10 +37,12 @@
     ],
     "ignore": [
       "dist/punyexpr.js"
-    ]    
+    ]
   },
   "jest": {
-    "setupFilesAfterEnv": ["./tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ],
     "collectCoverage": true,
     "collectCoverageFrom": [
       "punyexpr.js"
