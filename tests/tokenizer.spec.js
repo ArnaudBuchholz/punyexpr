@@ -69,9 +69,10 @@ describe('tokenizer', () => {
   })
 
   describe('error', () => {
+    const error = offset => new punyexpr.Error('InvalidTokenError', `Invalid token @${offset}`, offset)
     process({
-      '"\'': new punyexpr.InvalidTokenError(0),
-      '9a': new punyexpr.InvalidTokenError(1)
+      '"\'': error(0),
+      '9a': error(1)
     })
   })
 })
