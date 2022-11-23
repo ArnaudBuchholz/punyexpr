@@ -61,6 +61,10 @@
     }
   }
 
+  const TOKEN_TYPE = 0
+  const TOKEN_VALUE = 1
+  const TOKEN_OFFSET  =2
+
   const tokenize = (string) => {
     const tokens = []
     let offset = 0
@@ -90,11 +94,117 @@
     return tokens.filter(([type]) => type !== TOKEN_TYPE_SEPARATOR)
   }
 
-  const punyexpr = {} /* (expr) => {
-  } */
+  const bind = (impl, ...params) => impl.bind(null, ...params)
 
-  punyexpr.tokenize = tokenize
-  punyexpr.InvalidTokenError = InvalidTokenError
+  const impl = {
+    _reduce (op, ...args) {
+      const context = args.pop()
+      const first = args.shift()
+      return args.reduce((sum, arg) => op(sum, arg, context), first(context))
+    },
+
+    add (...args) {
+      return impl._reduce((total, arg, context) => total + arg(context))
+    },
+
+    sub (...args) {
+      return impl._reduce((total, arg, context) => total - arg(context))
+    },
+
+    get (member, context) {
+      return context[member]
+    },
+
+    ternary (condition, trueValue, falseValue, context) {
+      if (condition(context)) {
+        return trueValue(context)
+      }
+      return falseValue(context)
+    }
+  }
+
+  class UnexpectedTokenError extends Error {
+    constructor (offset) {
+      super(`Unexpected token @${offset}`)
+      this.offset = offset
+    }
+  }
+
+  class EndOfExpressionError extends Error {
+    constructor () {
+      super(`Unexpected end of expression`)
+    }
+  }
+
+  const parse = (tokens) => {
+    const current = () => tokens[0]
+    const preview = (steps = 1) => tokens[steps]
+
+    const shift = (steps = 1) => {
+      if (tokens.length < steps) {
+        throw new EndOfExpressionError()
+      }
+      const result = tokens.slice(0, steps)
+      tokens = tokens.slice(steps)
+      return result
+    }
+
+    const isSymbol = (expected = undefined) => {
+
+      const current()[TOKEN_TYPE] === TOKEN_TYPE_SYMBOL
+    }
+
+
+    const unexpected = () => { throw UnexpectedTokenError(current()[TOKEN_OFFSET]) }
+
+    const parser = {
+      literal () {
+        if (isSymbol()) {
+          unexpected()
+        }
+        const [[type, value]] = shift()
+        if (type === TOKEN_TYPE_IDENTIFIER) {
+          return bind(impl.get, value)
+        }
+        return () => value
+      },
+
+      additiveExpression () {
+        const literal = parser.literal()
+        const token = current()
+        if (!token) {
+          return literal
+        }
+        if (token[TOKEN_TYPE] === TOKEN_TYPE_SYMBOL)
+        if (ok)
+
+      },
+
+      expression () {
+        return parser.additiveExpression()
+      }
+    }
+
+    return parser.expression()
+  }
+
+  const punyexpr = (string) => {
+    const expression = parse(tokenize(string))
+    return function (context = {}) {
+      try {
+        return expression(context)
+      } catch (e) {
+        return ''
+      }
+    }
+  }
+
+  Object.assign(punyexpr, {
+    tokenize,
+    InvalidTokenError,
+    UnexpectedTokenError,
+    EndOfExpressionError
+  })
 
   exports.punyexpr = punyexpr
 }(this))
