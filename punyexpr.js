@@ -54,18 +54,24 @@
     value => value === 'true' // TOKEN_REGEXP_BOOLEAN
   ]
 
-  class InvalidTokenError extends Error {
-    constructor (offset) {
-      super(`Invalid token @${offset}`)
+  class PunyExprError extends Error {
+    constructor (name, message, offset) {
+      super(message)
+      this.name = name
       this.offset = offset
     }
   }
+  PunyExprError.throw = (name, message, offset) => {
+    throw new PunyExprError(name, message, offset)
+  }
 
-  const TOKEN_TYPE = 0
-  const TOKEN_VALUE = 1
-  const TOKEN_OFFSET  =2
+  // const TOKEN_TYPE = 0
+  // const TOKEN_VALUE = 1
+  const TOKEN_OFFSET = 2
 
   const tokenize = (string) => {
+    const invalidTokenError = offset => PunyExprError.throw('InvalidTokenError', `Invalid token @${offset}`, offset)
+
     const tokens = []
     let offset = 0
     let lastTokenType = TOKEN_TYPE_SEPARATOR
@@ -82,11 +88,11 @@
       }
       const type = TOKEN_TYPES[rawType]
       if (!separatorLess.includes(type) && !separatorLess.includes(lastTokenType)) {
-        throw new InvalidTokenError(offset)
+        invalidTokenError(offset)
       }
       lastTokenType = TOKEN_TYPES[rawType]
       if (lastTokenType === TOKEN_TYPE_UNKNOWN) {
-        throw new InvalidTokenError(offset)
+        invalidTokenError(offset)
       }
       tokens.push([lastTokenType, value, offset])
       offset += rawValue.length
@@ -94,25 +100,29 @@
     return tokens.filter(([type]) => type !== TOKEN_TYPE_SEPARATOR)
   }
 
-  const bind = (impl, ...params) => impl.bind(null, ...params)
+  const bind = (impl, ...args) => Object.assign(impl.bind(null, ...args), { op: impl.name, args })
 
   const impl = {
-    _reduce (op, ...args) {
+    constant (value) {
+      return value
+    },
+
+    _reduce (op, args) {
       const context = args.pop()
       const first = args.shift()
       return args.reduce((sum, arg) => op(sum, arg, context), first(context))
     },
 
     add (...args) {
-      return impl._reduce((total, arg, context) => total + arg(context))
+      return impl._reduce((total, arg, context) => total + arg(context), args)
     },
 
     sub (...args) {
-      return impl._reduce((total, arg, context) => total - arg(context))
+      return impl._reduce((total, arg, context) => total - arg(context), args)
     },
 
     get (member, context) {
-      return context[member]
+      return context[member(context)]
     },
 
     ternary (condition, trueValue, falseValue, context) {
@@ -123,61 +133,60 @@
     }
   }
 
-  class UnexpectedTokenError extends Error {
-    constructor (offset) {
-      super(`Unexpected token @${offset}`)
-      this.offset = offset
-    }
-  }
-
-  class EndOfExpressionError extends Error {
-    constructor () {
-      super(`Unexpected end of expression`)
-    }
-  }
-
   const parse = (tokens) => {
+    const endOfExpressionError = () => PunyExprError.throw('EndOfExpressionError', 'Unexpected end of expression')
+
+    const eof = () => tokens.length === 0
     const current = () => tokens[0]
-    const preview = (steps = 1) => tokens[steps]
+    const offset = () => current()[TOKEN_OFFSET]
 
     const shift = (steps = 1) => {
-      if (tokens.length < steps) {
-        throw new EndOfExpressionError()
-      }
+      // if (tokens.length < steps) {
+      //   throw new endOfExpressionError()
+      // }
       const result = tokens.slice(0, steps)
       tokens = tokens.slice(steps)
       return result
     }
 
     const isSymbol = (expected = undefined) => {
-
-      const current()[TOKEN_TYPE] === TOKEN_TYPE_SYMBOL
+      const [type, value] = current() || []
+      return (type === TOKEN_TYPE_SYMBOL) && (!expected || expected.includes(value))
     }
 
-
-    const unexpected = () => { throw UnexpectedTokenError(current()[TOKEN_OFFSET]) }
+    const unexpected = () => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset()}`, offset())
 
     const parser = {
       literal () {
+        if (eof()) {
+          endOfExpressionError()
+        }
         if (isSymbol()) {
           unexpected()
         }
         const [[type, value]] = shift()
         if (type === TOKEN_TYPE_IDENTIFIER) {
-          return bind(impl.get, value)
+          return bind(impl.get, bind(impl.constant, value))
         }
-        return () => value
+        return bind(impl.constant, value)
       },
 
       additiveExpression () {
-        const literal = parser.literal()
+        let result = parser.literal()
         const token = current()
         if (!token) {
-          return literal
+          return result
         }
-        if (token[TOKEN_TYPE] === TOKEN_TYPE_SYMBOL)
-        if (ok)
-
+        while (isSymbol('-+')) {
+          const [[, symbol]] = shift()
+          const next = parser.literal()
+          if (symbol === '+') {
+            result = bind(impl.add, result, next)
+          } else {
+            result = bind(impl.sub, result, next)
+          }
+        }
+        return result
       },
 
       expression () {
@@ -185,25 +194,31 @@
       }
     }
 
-    return parser.expression()
+    const result = parser.expression()
+    if (tokens.length !== 0) {
+      PunyExprError.throw('UnexpectedRemainderError', `Unexpected left over tokens @${offset()}`, offset())
+    }
+    return result
   }
 
-  const punyexpr = (string) => {
-    const expression = parse(tokenize(string))
-    return function (context = {}) {
+  const punyexpr = str => {
+    const impl = parse(tokenize(str))
+    function expr (context = {}) {
       try {
-        return expression(context)
+        return impl(context)
       } catch (e) {
         return ''
       }
     }
+    return Object.assign(expr, {
+      impl,
+      str
+    })
   }
 
   Object.assign(punyexpr, {
     tokenize,
-    InvalidTokenError,
-    UnexpectedTokenError,
-    EndOfExpressionError
+    Error: PunyExprError
   })
 
   exports.punyexpr = punyexpr
