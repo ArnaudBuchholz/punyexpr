@@ -34,13 +34,13 @@ describe('expression', () => {
 
   describe('basic', () => {
     process({
-      '1': {
+      1: {
         json: {
           constant: [1]
         },
         expected: 1
       },
-      'true': {
+      true: {
         json: {
           constant: [true]
         },
@@ -127,7 +127,7 @@ describe('expression', () => {
 
   describe('contextual', () => {
     process({
-      'hello': {
+      hello: {
         json: {
           get: [
             { constant: ['hello'] }
