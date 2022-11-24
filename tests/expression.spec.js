@@ -1,5 +1,7 @@
 'use strict'
 
+const { punyexpr } = require("../punyexpr")
+
 const jsonify = expr => ({
   [expr.op]: expr.args.map(
     arg => typeof arg === 'function'
@@ -17,17 +19,38 @@ describe('expression', () => {
   const process = (tests, context) => {
     Object.keys(tests).forEach(expression => {
       const { json, expected, verbose, debug } = tests[expression]
-      it(`${expression} = ${JSON.stringify(expected)}`, () => {
+      let label
+      if (expected instanceof Error) {
+        label = expected.name
+      } else {
+        label = JSON.stringify(expected)
+      }
+      it(`${expression} = ${label}`, () => {
         if (debug) {
           debugger // eslint-disable-line no-debugger
         }
-        const expr = punyexpr(expression)
-        expect(expr.str).toBe(expression)
-        if (verbose) {
-          console.log(JSON.stringify(jsonify(expr.impl), undefined, 2))
+        let exceptionCaught
+        let expr
+        try {
+          expr = punyexpr(expression)
+        } catch (error) {
+          exceptionCaught = error
         }
-        expect(jsonify(expr.impl)).toStrictEqual(json)
-        expect(expr(context)).toBe(expected)
+        if (expected instanceof Error) {
+          expect(exceptionCaught).not.toBeUndefined()
+          expect(exceptionCaught.name).toBe(expected.name)
+          expect(exceptionCaught.message).toBe(expected.message)
+          expect(exceptionCaught.offset).toBe(expected.offset)
+        } else if (exceptionCaught) {
+          throw exceptionCaught
+        } else {
+          expect(expr.str).toBe(expression)
+          if (verbose) {
+            console.log(JSON.stringify(jsonify(expr.impl), undefined, 2))
+          }
+          expect(jsonify(expr.impl)).toStrictEqual(json)
+          expect(expr(context)).toBe(expected)
+        }
       })
     })
   }
@@ -157,6 +180,20 @@ describe('expression', () => {
       }
     }, {
       hello: 'World !'
+    })
+  })
+
+  describe('error', () => {
+    const error = (name, message, offset) => ({
+      expected: new punyexpr.Error(name, message, offset)
+    })
+    process({
+      '+': error('UnexpectedTokenError', 'Unexpected token @0', 0),
+      '1 +': error('EndOfExpressionError', 'Unexpected end of expression'),
+      '1 ++': error('UnexpectedTokenError', 'Unexpected token @3', 3),
+      '1 ? 2 +': error('EndOfExpressionError', 'Unexpected end of expression'),
+      '1 ? 2 2': error('UnexpectedTokenError', 'Unexpected token @6', 6),
+      '1 2': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2)
     })
   })
 })
