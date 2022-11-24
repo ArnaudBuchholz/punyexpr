@@ -6,7 +6,15 @@ describe('tokenizer', () => {
       const expected = tests[text]
       if (expected instanceof Error) {
         it(`${JSON.stringify(text)} ⇒ fails @${expected.offset}`, () => {
-          expect(() => punyexpr.tokenize(text)).toThrowError(expected)
+          let exceptionCaught
+          try {
+            punyexpr.tokenize(text)
+          } catch (error) {
+            exceptionCaught = error
+          }
+          expect(exceptionCaught.name).toBe(expected.name)
+          expect(exceptionCaught.message).toBe(expected.message)
+          expect(exceptionCaught.offset).toBe(expected.offset)
         })
       } else {
         it(`${JSON.stringify(text)} ⇒ ${JSON.stringify(expected)}`, () => {
@@ -72,7 +80,8 @@ describe('tokenizer', () => {
     const error = offset => new punyexpr.Error('InvalidTokenError', `Invalid token @${offset}`, offset)
     process({
       '"\'': error(0),
-      '9a': error(1)
+      '9a': error(1),
+      '@': error(0)
     })
   })
 })
