@@ -121,6 +121,26 @@ describe('expression', () => {
           ]
         },
         expected: -1
+      },
+      'true ? 1 : 2': {
+        json: {
+          ternary: [
+            { constant: [true] },
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: 1
+      },
+      'false ? "a" : "b"': {
+        json: {
+          ternary: [
+            { constant: [false] },
+            { constant: ['a'] },
+            { constant: ['b'] }
+          ]
+        },
+        expected: 'b'
       }
     })
   })
