@@ -14,7 +14,7 @@
   const TOKEN_REGEXP_IDENTIFIER = /([a-zA-Z_][a-zA-Z_0-9]*)/
   const TOKEN_TYPE_IDENTIFIER = 'identifier'
 
-  const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.)/
+  const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.|\?|:)/
   const TOKEN_TYPE_SYMBOL = 'symbol'
 
   const TOKEN_REGEXP_SEPARATOR = /(\s)/
@@ -134,12 +134,8 @@
   }
 
   const parse = (tokens) => {
-    const endOfExpressionError = () => PunyExprError.throw('EndOfExpressionError', 'Unexpected end of expression')
-
-    const eof = () => tokens.length === 0
     const current = () => tokens[0]
     const offset = () => current()[TOKEN_OFFSET]
-
     const shift = (steps = 1) => {
       // if (tokens.length < steps) {
       //   throw new endOfExpressionError()
@@ -148,19 +144,20 @@
       tokens = tokens.slice(steps)
       return result
     }
-
     const isSymbol = (expected = undefined) => {
       const [type, value] = current() || []
       return (type === TOKEN_TYPE_SYMBOL) && (!expected || expected.includes(value))
     }
-
+    const checkNotEndOfExpression = () => {
+      if (tokens.length === 0) {
+        PunyExprError.throw('EndOfExpressionError', 'Unexpected end of expression')
+      }
+    }
     const unexpected = () => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset()}`, offset())
 
     const parser = {
       literal () {
-        if (eof()) {
-          endOfExpressionError()
-        }
+        checkNotEndOfExpression()
         if (isSymbol()) {
           unexpected()
         }
@@ -189,8 +186,28 @@
         return result
       },
 
+      conditionalExpression () {
+        const condition = parser.additiveExpression()
+        const token = current()
+        if (!token) {
+          return condition
+        }
+        if (isSymbol('?')) {
+          shift()
+          const trueResult = parser.expression()
+          checkNotEndOfExpression()
+          if (!isSymbol(':')) {
+            unexpected()
+          }
+          shift()
+          const falseResult = parser.expression()
+          return bind(impl.ternary, condition, trueResult, falseResult)
+        }
+        return condition
+      },
+
       expression () {
-        return parser.additiveExpression()
+        return parser.conditionalExpression()
       }
     }
 
