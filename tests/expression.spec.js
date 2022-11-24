@@ -1,6 +1,6 @@
 'use strict'
 
-const { punyexpr } = require("../punyexpr")
+const { punyexpr } = require('../punyexpr')
 
 const jsonify = expr => ({
   [expr.op]: expr.args.map(
