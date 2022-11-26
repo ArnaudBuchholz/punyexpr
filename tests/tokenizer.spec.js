@@ -27,20 +27,22 @@ describe('tokenizer', () => {
 
   describe('basic', () => {
     process({
-      '\'a\'': [['string', 'a', 0]],
-      '\'a\\\'b\'': [['string', 'a\'b', 0]],
-      '"a"': [['string', 'a', 0]],
-      '"a\\"b"': [['string', 'a"b', 0]],
+      '\'a\'': [['literal', 'a', 0]],
+      '\'a\\\'b\'': [['literal', 'a\'b', 0]],
+      '"a"': [['literal', 'a', 0]],
+      '"a\\"b"': [['literal', 'a"b', 0]],
 
-      1: [['number', 1, 0]],
-      '1.0': [['number', 1, 0]],
-      '1.': [['number', 1, 0]],
-      123: [['number', 123, 0]],
-      1.23: [['number', 1.23, 0]],
-      '.123': [['number', 0.123, 0]],
+      1: [['literal', 1, 0]],
+      '1.0': [['literal', 1, 0]],
+      '1.': [['literal', 1, 0]],
+      123: [['literal', 123, 0]],
+      1.23: [['literal', 1.23, 0]],
+      '.123': [['literal', 0.123, 0]],
 
-      true: [['boolean', true, 0]],
-      false: [['boolean', false, 0]],
+      true: [['literal', true, 0]],
+      false: [['literal', false, 0]],
+      undefined: [['literal', undefined, 0]],
+      null: [['literal', null, 0]],
 
       a: [['identifier', 'a', 0]],
       _a: [['identifier', '_a', 0]],
@@ -49,6 +51,8 @@ describe('tokenizer', () => {
       abc: [['identifier', 'abc', 0]],
       abc_def: [['identifier', 'abc_def', 0]],
       abc123: [['identifier', 'abc123', 0]],
+
+      typeof: [['identifier', 'typeof', 0]],
 
       '+': [['symbol', '+', 0]],
       '-': [['symbol', '-', 0]],
@@ -62,9 +66,9 @@ describe('tokenizer', () => {
 
   describe('combining', () => {
     process({
-      '1+1': [['number', 1, 0], ['symbol', '+', 1], ['number', 1, 2]],
-      '1 +  1': [['number', 1, 0], ['symbol', '+', 2], ['number', 1, 5]],
-      '1\t+\n1': [['number', 1, 0], ['symbol', '+', 2], ['number', 1, 4]],
+      '1+1': [['literal', 1, 0], ['symbol', '+', 1], ['literal', 1, 2]],
+      '1 +  1': [['literal', 1, 0], ['symbol', '+', 2], ['literal', 1, 5]],
+      '1\t+\n1': [['literal', 1, 0], ['symbol', '+', 2], ['literal', 1, 4]],
       'items[step].member': [
         ['identifier', 'items', 0],
         ['symbol', '[', 5],
@@ -81,7 +85,10 @@ describe('tokenizer', () => {
     process({
       '"\'': error(0),
       '9a': error(1),
-      '@': error(0)
+      '@': error(0),
+      if: error(0),
+      while: error(0),
+      var: error(0) 
     })
   })
 })
