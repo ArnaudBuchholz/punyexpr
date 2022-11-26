@@ -92,11 +92,148 @@
   }
 
   const parse = (tokens) => {
+  /*
+
+  Simplified grammar (based on https://tc39.es/ecma262/#sec-expressions)
+
+  ⛔ Not implemented
+  ⚠️ Modified / adapted
+
+  PrimaryExpression :
+    ⛔this
+    IdentifierReference
+    Literal
+    ⛔ArrayLiteral
+    ⛔ObjectLiteral
+    ⛔RegularExpressionLiteral
+    ⛔TemplateLiteral
+
+  MemberExpression :
+    MemberExpression [ Expression ]
+    MemberExpression . IdentifierName
+    ⛔MemberExpression TemplateLiteral
+    ⛔SuperProperty
+    ⛔MetaProperty
+    ⛔new MemberExpression Arguments
+    ⛔MemberExpression . PrivateIdentifier
+
+   ⛔NewExpression :
+    ⛔new NewExpression
+
+  ⚠️ CallExpression : 💬 may not support this call
+    MemberExpression
+    MemberExpression ( )
+    MemberExpression ( AssignmentExpression ⟮, AssignmentExpression⟯∗ )
+
+  LeftHandSideExpression :
+    CallExpression
+    ⛔OptionalExpression
+
+  ⛔UpdateExpression : ➡️ LeftHandSideExpression
+    ⛔LeftHandSideExpression ++
+    ⛔LeftHandSideExpression --
+    ⛔++ UnaryExpression
+    ⛔-- UnaryExpression
+
+  UnaryExpression :
+    ⛔delete UnaryExpression
+    ⛔void UnaryExpression
+    typeof UnaryExpression
+    + UnaryExpression
+    - UnaryExpression
+    ⛔~ UnaryExpression
+    ! UnaryExpression
+    ⛔AwaitExpression
+
+  ExponentiationExpression :
+    UpdateExpression ** ExponentiationExpression
+
+  MultiplicativeExpression :
+    MultiplicativeExpression * ExponentiationExpression
+    MultiplicativeExpression / ExponentiationExpression
+    MultiplicativeExpression % ExponentiationExpression
+
+  AdditiveExpression :
+    AdditiveExpression + MultiplicativeExpression
+    AdditiveExpression - MultiplicativeExpression
+
+  ⛔ShiftExpression : ➡️ AdditiveExpression
+    ⛔ShiftExpression << AdditiveExpression
+    ⛔ShiftExpression >> AdditiveExpression
+    ⛔ShiftExpression >>> AdditiveExpression
+
+  RelationalExpression :
+    RelationalExpression < ShiftExpression
+    RelationalExpression > ShiftExpression
+    RelationalExpression <= ShiftExpression
+    RelationalExpression >= ShiftExpression
+    ⛔RelationalExpression instanceof ShiftExpression
+    ⛔RelationalExpression in ShiftExpression
+    ⛔PrivateIdentifier in ShiftExpression
+
+  EqualityExpression :
+    EqualityExpression == RelationalExpression
+    EqualityExpression != RelationalExpression
+    EqualityExpression === RelationalExpression
+    EqualityExpression !== RelationalExpression
+
+  ⛔BitwiseANDExpression :
+    ⛔BitwiseANDExpression & EqualityExpression
+
+  ⛔BitwiseXORExpression :
+    ⛔BitwiseXORExpression ^ BitwiseANDExpression
+
+  ⛔BitwiseORExpression : ➡️ EqualityExpression
+    ⛔BitwiseORExpression | BitwiseXORExpression
+
+  LogicalANDExpression :
+    LogicalANDExpression && BitwiseORExpression
+
+  LogicalORExpression :
+    LogicalORExpression || LogicalANDExpression
+
+  CoalesceExpression :
+    CoalesceExpressionHead ?? BitwiseORExpression
+
+  ConditionalExpression :
+    ShortCircuitExpression ? AssignmentExpression : AssignmentExpression
+
+  ⛔AssignmentExpression : ➡️ LeftHandSideExpression
+    ⛔YieldExpression
+    ⛔LeftHandSideExpression = AssignmentExpression
+    ⛔LeftHandSideExpression AssignmentOperator AssignmentExpression
+    ⛔LeftHandSideExpression &&= AssignmentExpression
+    ⛔LeftHandSideExpression ||= AssignmentExpression
+    ⛔LeftHandSideExpression ??= AssignmentExpression
+
+  Expression :
+    Expression , AssignmentExpression
+*/
     const bind = (impl, ...args) => Object.assign(impl.bind(null, ...args), { op: impl.name, args })
 
     const impl = {
       constant (value) {
         return value
+      },
+
+      get (member, context) {
+        return context[member(context)]
+      },
+
+      not (value, context) {
+        return !value(context)
+      },
+
+      mul (value1, value2, context) {
+        return value1(context) * value2(context)
+      },
+
+      div (value1, value2, context) {
+        return value1(context) / value2(context)
+      },
+
+      remainder (value1, value2, context) {
+        return value1(context) % value2(context)
       },
 
       add (value1, value2, context) {
@@ -107,8 +244,48 @@
         return value1(context) - value2(context)
       },
 
-      get (member, context) {
-        return context[member(context)]
+      lt (value1, value2, context) {
+        return value1(context) < value2(context)
+      },
+
+      gt (value1, value2, context) {
+        return value1(context) > value2(context)
+      },
+
+      lte (value1, value2, context) {
+        return value1(context) <= value2(context)
+      },
+
+      gte (value1, value2, context) {
+        return value1(context) >= value2(context)
+      },
+
+      eq (value1, value2, context) {
+        // eslint-disable-next-line eqeqeq
+        return value1(context) == value2(context)
+      },
+
+      ne (value1, value2, context) {
+        // eslint-disable-next-line eqeqeq
+        return value1(context) != value2(context)
+      },
+
+      eqq (value1, value2, context) {
+        return value1(context) === value2(context)
+      },
+
+      neqq (value1, value2, context) {
+        return value1(context) !== value2(context)
+      },
+
+      and (value1, value2, context) {
+        // eslint-disable-next-line eqeqeq
+        return value1(context) && value2(context)
+      },
+
+      or (value1, value2, context) {
+        // eslint-disable-next-line eqeqeq
+        return value1(context) || value2(context)
       },
 
       ternary (condition, trueValue, falseValue, context) {
