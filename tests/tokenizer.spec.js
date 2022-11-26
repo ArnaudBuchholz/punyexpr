@@ -88,7 +88,7 @@ describe('tokenizer', () => {
       '@': error(0),
       if: error(0),
       while: error(0),
-      var: error(0) 
+      var: error(0)
     })
   })
 })
