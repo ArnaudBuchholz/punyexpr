@@ -4,7 +4,9 @@ const jsonify = expr => ({
   [expr.op]: expr.args.map(
     arg => typeof arg === 'function'
       ? jsonify(arg)
-      : arg
+      : Array.isArray(arg)
+        ? arg.map(jsonify)
+        : arg
   )
 })
 
@@ -648,28 +650,26 @@ describe('expression', () => {
           ]
         },
         expected: 'OK'
-      // },
-      // 'object.method(1)': {
-      //   json: {
-      //     call: [
-      //       {
-      //         get: [
-      //           {
-      //             rootGet: [
-      //               { constant: ['object'] }
-      //             ]
-      //           },
-      //           { constant: ['method'] }
-      //         ]
-      //       },
-      //       [
-      //         { constant: [1] }
-      //       ]
-      //     ]
-      //   },
-      //   verbose: true,
-      //   only: true,
-      //   expected: 'OK1'
+      },
+      'object.method(1)': {
+        json: {
+          call: [
+            {
+              get: [
+                {
+                  rootGet: [
+                    { constant: ['object'] }
+                  ]
+                },
+                { constant: ['method'] }
+              ]
+            },
+            [
+              { constant: [1] }
+            ]
+          ]
+        },
+        expected: 'OK1'
       }
     }, {
       hello: 'World !',
