@@ -593,6 +593,52 @@ describe('expression', () => {
           ]
         },
         expected: 'object'
+      },
+      '+1': {
+        json: {
+          add: [
+            { constant: [0] },
+            { constant: [1] }
+          ]
+        },
+        expected: 1
+      },
+      '-1': {
+        json: {
+          sub: [
+            { constant: [0] },
+            { constant: [1] }
+          ]
+        },
+        expected: -1
+      },
+      '!true': {
+        json: {
+          not: [
+            { constant: [true] }
+          ]
+        },
+        expected: false
+      },
+      '!false': {
+        json: {
+          not: [
+            { constant: [false] }
+          ]
+        },
+        expected: true
+      },
+      '!!""': {
+        json: {
+          not: [
+            {
+              not: [
+                { constant: [''] }
+              ]
+            }
+          ]
+        },
+        expected: false
       }
     })
   })
@@ -670,6 +716,27 @@ describe('expression', () => {
           ]
         },
         expected: 'OK1'
+      },
+      'object.method(1,2)': {
+        json: {
+          call: [
+            {
+              get: [
+                {
+                  rootGet: [
+                    { constant: ['object'] }
+                  ]
+                },
+                { constant: ['method'] }
+              ]
+            },
+            [
+              { constant: [1] },
+              { constant: [2] }
+            ]
+          ]
+        },
+        expected: 'OK1,2'
       }
     }, {
       hello: 'World !',
@@ -694,7 +761,8 @@ describe('expression', () => {
       '1 2': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2),
       '(1 + 2]': error('UnexpectedTokenError', 'Unexpected token @6', 6),
       'a.+': error('UnexpectedTokenError', 'Unexpected token @2', 2),
-      'a[1)': error('UnexpectedTokenError', 'Unexpected token @3', 3)
+      'a[1)': error('UnexpectedTokenError', 'Unexpected token @3', 3),
+      'a(1]': error('UnexpectedTokenError', 'Unexpected token @3', 3)
     })
   })
 })
