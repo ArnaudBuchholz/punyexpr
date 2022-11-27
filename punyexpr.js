@@ -26,7 +26,7 @@
 
     const TOKEN_REGEXP_IDENTIFIER = /([a-zA-Z_][a-zA-Z_0-9]*)/
 
-    const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.|\?|:|%|<|=|>|!|&|\||\(|\))/
+    const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.|\?|:|%|<|=|>|!|&|\||\(|\)|,)/
 
     const TOKEN_REGEXP_SEPARATOR = /(\s)/
 
@@ -377,20 +377,19 @@
     const unaryExpression = (tokens) => {
       const [type, value] = current(tokens)
       const postProcess = isSymbol(tokens, '+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
-      if (postProcess) {
-        shift(tokens)
+      if (!postProcess) {
+        return callExpression(tokens)
       }
-      let result = callExpression(tokens)
-      if (postProcess) {
-        if (value === '+') {
-          result = bind(add, bind(constant, 0), result)
-        } else if (value === '-') {
-          result = bind(sub, bind(constant, 0), result)
-        } else if (value === '!') {
-          result = bind(not, result)
-        } else {
-          result = bind(getTypeof, result)
-        }
+      shift(tokens)
+      let result = expression(tokens)
+      if (value === '+') {
+        result = bind(add, bind(constant, 0), result)
+      } else if (value === '-') {
+        result = bind(sub, bind(constant, 0), result)
+      } else if (value === '!') {
+        result = bind(not, result)
+      } else {
+        result = bind(getTypeof, result)
       }
       return result
     }
