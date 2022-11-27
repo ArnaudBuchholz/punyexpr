@@ -54,13 +54,10 @@ describe('tokenizer', () => {
 
       typeof: [['identifier', 'typeof', 0]],
 
-      '+': [['symbol', '+', 0]],
-      '-': [['symbol', '-', 0]],
-      '*': [['symbol', '*', 0]],
-      '/': [['symbol', '/', 0]],
-      '[': [['symbol', '[', 0]],
-      ']': [['symbol', ']', 0]],
-      '.': [['symbol', '.', 0]]
+      ...'+-*/[].?:%<=>!&|()'.split('').reduce((dict, symbol) => {
+        dict[symbol] = [['symbol', symbol, 0]]
+        return dict
+      }, {})
     })
   })
 
