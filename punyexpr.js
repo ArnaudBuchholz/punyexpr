@@ -360,11 +360,13 @@
         shift(tokens)
         const args = []
         while (!isSymbol(tokens, ')')) {
-          if (args.length > 0 && !isSymbol(tokens, ',')) {
-            unexpected(tokens)
+          if (args.length > 0) {
+            if (!isSymbol(tokens, ',')) {
+              unexpected(tokens)
+            }
+            shift(tokens)
           }
-          shift(tokens)
-          args.push(conditionalExpression)
+          args.push(conditionalExpression(tokens))
         }
         shift(tokens)
         return bind(call, member, args)
