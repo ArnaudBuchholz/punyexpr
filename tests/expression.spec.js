@@ -1,7 +1,5 @@
 'use strict'
 
-const { punyexpr } = require('../punyexpr')
-
 const jsonify = expr => ({
   [expr.op]: expr.args.map(
     arg => typeof arg === 'function'
@@ -18,14 +16,20 @@ describe('expression', () => {
 
   const process = (tests, context) => {
     Object.keys(tests).forEach(expression => {
-      const { json, expected, verbose, debug } = tests[expression]
+      const { json, expected, only, verbose, debug } = tests[expression]
       let label
       if (expected instanceof Error) {
         label = expected.name
       } else {
         label = JSON.stringify(expected)
       }
-      it(`${expression} = ${label}`, () => {
+      let testMethod
+      if (only) {
+        testMethod = it.only
+      } else {
+        testMethod = it
+      }
+      testMethod(`${expression} = ${label}`, () => {
         if (debug) {
           debugger // eslint-disable-line no-debugger
         }
@@ -45,10 +49,13 @@ describe('expression', () => {
           throw exceptionCaught
         } else {
           expect(expr.str).toBe(expression)
+          const jsonified = jsonify(expr.impl)
           if (verbose) {
-            console.log(JSON.stringify(jsonify(expr.impl), undefined, 2))
+            console.log(JSON.stringify(jsonified, undefined, 2))
           }
-          expect(jsonify(expr.impl)).toStrictEqual(json)
+          if (json) {
+            expect(jsonified).toStrictEqual(json)
+          }
           expect(expr(context)).toBe(expected)
         }
       })
@@ -145,6 +152,366 @@ describe('expression', () => {
         },
         expected: -1
       },
+      '10 ** 2': {
+        json: {
+          exp: [
+            { constant: [10] },
+            { constant: [2] }
+          ]
+        },
+        expected: 100
+      },
+      '2 * 3': {
+        json: {
+          mul: [
+            { constant: [2] },
+            { constant: [3] }
+          ]
+        },
+        expected: 6
+      },
+      '3 / 2': {
+        json: {
+          div: [
+            { constant: [3] },
+            { constant: [2] }
+          ]
+        },
+        expected: 1.5
+      },
+      '3 % 2': {
+        json: {
+          remainder: [
+            { constant: [3] },
+            { constant: [2] }
+          ]
+        },
+        expected: 1
+      },
+      '2 < 2': {
+        lt: {
+          remainder: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '1 < 2': {
+        lt: {
+          remainder: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '2 < 1': {
+        lt: {
+          remainder: [
+            { constant: [2] },
+            { constant: [1] }
+          ]
+        },
+        expected: false
+      },
+      '2 <= 2': {
+        lte: {
+          remainder: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '1 <= 2': {
+        lte: {
+          remainder: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '2 <= 1': {
+        lte: {
+          remainder: [
+            { constant: [2] },
+            { constant: [1] }
+          ]
+        },
+        expected: false
+      },
+      '2 > 2': {
+        gt: {
+          remainder: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '1 > 2': {
+        gt: {
+          remainder: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '2 > 1': {
+        gt: {
+          remainder: [
+            { constant: [2] },
+            { constant: [1] }
+          ]
+        },
+        expected: true
+      },
+      '2 >= 2': {
+        gte: {
+          remainder: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '1 >= 2': {
+        gte: {
+          remainder: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '2 >= 1': {
+        lte: {
+          remainder: [
+            { constant: [2] },
+            { constant: [1] }
+          ]
+        },
+        expected: true
+      },
+      '1 == 2': {
+        json: {
+          eq: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '"1" == 2': {
+        json: {
+          eq: [
+            { constant: ['1'] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '2 == 2': {
+        json: {
+          eq: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '"2" == 2': {
+        json: {
+          eq: [
+            { constant: ['2'] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '1 != 2': {
+        json: {
+          neq: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '"1" != 2': {
+        json: {
+          neq: [
+            { constant: ['1'] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '2 != 2': {
+        json: {
+          neq: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '"2" != 2': {
+        json: {
+          neq: [
+            { constant: ['2'] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '1 === 2': {
+        json: {
+          eqq: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '"1" === 2': {
+        json: {
+          eqq: [
+            { constant: ['1'] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '2 === 2': {
+        json: {
+          eqq: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '"2" === 2': {
+        json: {
+          eqq: [
+            { constant: ['2'] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '1 !== 2': {
+        json: {
+          neqq: [
+            { constant: [1] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '"1" !== 2': {
+        json: {
+          neqq: [
+            { constant: ['1'] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      '2 !== 2': {
+        json: {
+          neqq: [
+            { constant: [2] },
+            { constant: [2] }
+          ]
+        },
+        expected: false
+      },
+      '"2" !== 2': {
+        json: {
+          neqq: [
+            { constant: ['2'] },
+            { constant: [2] }
+          ]
+        },
+        expected: true
+      },
+      'false && false': {
+        json: {
+          and: [
+            { constant: [false] },
+            { constant: [false] }
+          ]
+        },
+        expected: false
+      },
+      'true && false': {
+        json: {
+          and: [
+            { constant: [true] },
+            { constant: [false] }
+          ]
+        },
+        expected: false
+      },
+      'false && true': {
+        json: {
+          and: [
+            { constant: [false] },
+            { constant: [true] }
+          ]
+        },
+        expected: false
+      },
+      'true && true': {
+        json: {
+          and: [
+            { constant: [true] },
+            { constant: [true] }
+          ]
+        },
+        expected: true
+      },
+      'false || false': {
+        json: {
+          or: [
+            { constant: [false] },
+            { constant: [false] }
+          ]
+        },
+        expected: false
+      },
+      'true || false': {
+        json: {
+          or: [
+            { constant: [true] },
+            { constant: [false] }
+          ]
+        },
+        expected: true
+      },
+      'false || true': {
+        json: {
+          or: [
+            { constant: [false] },
+            { constant: [true] }
+          ]
+        },
+        expected: true
+      },
+      'true || true': {
+        json: {
+          or: [
+            { constant: [true] },
+            { constant: [true] }
+          ]
+        },
+        expected: true
+      },
       'true ? 1 : 2': {
         json: {
           ternary: [
@@ -164,6 +531,66 @@ describe('expression', () => {
           ]
         },
         expected: 'b'
+      },
+      '(1 + 2) * 3': {
+        json: {
+          mul: [
+            {
+              add: [
+                { constant: [1] },
+                { constant: [2] }
+              ]
+            },
+            { constant: [3] }
+          ]
+        },
+        expected: 9
+      },
+      '1 + (2 * 3)': {
+        json: {
+          add: [
+            { constant: [1] },
+            {
+              mul: [
+                { constant: [2] },
+                { constant: [3] }
+              ]
+            }
+          ]
+        },
+        expected: 7
+      },
+      'typeof 1': {
+        json: {
+          getTypeof: [
+            { constant: [1] }
+          ]
+        },
+        expected: 'number'
+      },
+      'typeof "abc"': {
+        json: {
+          getTypeof: [
+            { constant: ['abc'] }
+          ]
+        },
+        expected: 'string'
+      },
+      'typeof true': {
+        json: {
+          getTypeof: [
+            { constant: [true] }
+          ]
+        },
+        expected: 'boolean'
+      },
+      'typeof null': {
+        json: {
+          getTypeof: [
+            { constant: [null] }
+          ]
+        },
+        expected: 'object'
       }
     })
   })
@@ -172,14 +599,84 @@ describe('expression', () => {
     process({
       hello: {
         json: {
-          get: [
+          rootGet: [
             { constant: ['hello'] }
           ]
         },
         expected: 'World !'
+      },
+      'object.property1': {
+        json: {
+          get: [
+            {
+              rootGet: [
+                { constant: ['object'] }
+              ]
+            },
+            { constant: ['property1'] }
+          ]
+        },
+        expected: 1
+      },
+      'object["property1"]': {
+        json: {
+          get: [
+            {
+              rootGet: [
+                { constant: ['object'] }
+              ]
+            },
+            { constant: ['property1'] }
+          ]
+        },
+        expected: 1
+      },
+      'object.method()': {
+        json: {
+          call: [
+            {
+              get: [
+                {
+                  rootGet: [
+                    { constant: ['object'] }
+                  ]
+                },
+                { constant: ['method'] }
+              ]
+            },
+            []
+          ]
+        },
+        expected: 'OK'
+      // },
+      // 'object.method(1)': {
+      //   json: {
+      //     call: [
+      //       {
+      //         get: [
+      //           {
+      //             rootGet: [
+      //               { constant: ['object'] }
+      //             ]
+      //           },
+      //           { constant: ['method'] }
+      //         ]
+      //       },
+      //       [
+      //         { constant: [1] }
+      //       ]
+      //     ]
+      //   },
+      //   verbose: true,
+      //   only: true,
+      //   expected: 'OK1'
       }
     }, {
-      hello: 'World !'
+      hello: 'World !',
+      object: {
+        property1: 1,
+        method: (...args) => 'OK' + args.join(',')
+      }
     })
   })
 
@@ -188,12 +685,16 @@ describe('expression', () => {
       expected: new punyexpr.Error(name, message, offset)
     })
     process({
-      '+': error('UnexpectedTokenError', 'Unexpected token @0', 0),
+      '*': error('UnexpectedTokenError', 'Unexpected token @0', 0),
+      '+': error('EndOfExpressionError', 'Unexpected end of expression'),
       '1 +': error('EndOfExpressionError', 'Unexpected end of expression'),
-      '1 ++': error('UnexpectedTokenError', 'Unexpected token @3', 3),
+      '1 ++': error('EndOfExpressionError', 'Unexpected end of expression'),
       '1 ? 2 +': error('EndOfExpressionError', 'Unexpected end of expression'),
       '1 ? 2 2': error('UnexpectedTokenError', 'Unexpected token @6', 6),
-      '1 2': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2)
+      '1 2': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2),
+      '(1 + 2]': error('UnexpectedTokenError', 'Unexpected token @6', 6),
+      'a.+': error('UnexpectedTokenError', 'Unexpected token @2', 2),
+      'a[1)': error('UnexpectedTokenError', 'Unexpected token @3', 3)
     })
   })
 })
