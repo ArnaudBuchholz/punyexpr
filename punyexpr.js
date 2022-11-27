@@ -304,8 +304,6 @@
       }
     }
 
-    // add tokens
-
     const literal = (tokens) => {
       checkNotEndOfExpression(tokens)
       if (isSymbol(tokens)) {
