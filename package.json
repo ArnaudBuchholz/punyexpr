@@ -8,7 +8,7 @@
     "test": "jest",
     "mutate": "stryker run",
     "lint": "standard --fix",
-    "build": "uglifyjs punyexpr.js --compress --mangle --mangle-props reserved=['op','args','impl','str','tokenize','Error'] -o dist/punyexpr.js"
+    "build": "uglifyjs punyexpr.js --compress --mangle --mangle-props reserved=['op','args','impl','str','tokenize','Error','version'] -o dist/punyexpr.js && node version"
   },
   "repository": {
     "type": "git",
