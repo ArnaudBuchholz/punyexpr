@@ -629,6 +629,10 @@ describe('expression', () => {
           ]
         },
         expected: false
+      },
+      '"typeof"': {
+        json: { constant: ['typeof'] },
+        expected: 'typeof'
       }
     })
   })
@@ -748,6 +752,7 @@ describe('expression', () => {
       '1 ++': error('EndOfExpressionError', 'Unexpected end of expression'),
       '1 ? 2 +': error('EndOfExpressionError', 'Unexpected end of expression'),
       '1 ? 2 2': error('UnexpectedTokenError', 'Unexpected token @6', 6),
+      '1 ? 2 ,': error('UnexpectedTokenError', 'Unexpected token @6', 6),
       '1 2': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2),
       '(1 + 2]': error('UnexpectedTokenError', 'Unexpected token @6', 6),
       'a.+': error('UnexpectedTokenError', 'Unexpected token @2', 2),
