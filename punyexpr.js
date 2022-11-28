@@ -223,38 +223,38 @@
   Expression :
     ⚠️AssignmentExpression
 */
-    const bind = (impl, ...args) => Object.assign(impl.bind(null, ...args), { op: impl.name, args })
+    const bind = (impl, ...args) => Object.assign(impl[1].bind(null, ...args), { op: impl[0], args })
 
-    const constant = value => value
-    const rootGet = (member, context) => context[member(context)]
-    const get = (object, member, context) => object(context)[member(context)]
-    const not = (value, context) => !value(context)
-    const mul = (value1, value2, context) => value1(context) * value2(context)
-    const div = (value1, value2, context) => value1(context) / value2(context)
-    const exp = (value1, value2, context) => value1(context) ** value2(context)
-    const remainder = (value1, value2, context) => value1(context) % value2(context)
-    const add = (value1, value2, context) => value1(context) + value2(context)
-    const sub = (value1, value2, context) => value1(context) - value2(context)
-    const lt = (value1, value2, context) => value1(context) < value2(context)
-    const gt = (value1, value2, context) => value1(context) > value2(context)
-    const lte = (value1, value2, context) => value1(context) <= value2(context)
-    const gte = (value1, value2, context) => value1(context) >= value2(context)
+    const constant = ['constant', value => value]
+    const rootGet = ['rootGet', (member, context) => context[member(context)]]
+    const get = ['get', (object, member, context) => object(context)[member(context)]]
+    const not = ['not', (value, context) => !value(context)]
+    const mul = ['mul', (value1, value2, context) => value1(context) * value2(context)]
+    const div = ['div', (value1, value2, context) => value1(context) / value2(context)]
+    const exp = ['exp', (value1, value2, context) => value1(context) ** value2(context)]
+    const remainder = ['remainder', (value1, value2, context) => value1(context) % value2(context)]
+    const add = ['add', (value1, value2, context) => value1(context) + value2(context)]
+    const sub = ['sub', (value1, value2, context) => value1(context) - value2(context)]
+    const lt = ['lt', (value1, value2, context) => value1(context) < value2(context)]
+    const gt = ['gt', (value1, value2, context) => value1(context) > value2(context)]
+    const lte = ['lte', (value1, value2, context) => value1(context) <= value2(context)]
+    const gte = ['gte', (value1, value2, context) => value1(context) >= value2(context)]
     // eslint-disable-next-line eqeqeq
-    const eq = (value1, value2, context) => value1(context) == value2(context)
+    const eq = ['eq', (value1, value2, context) => value1(context) == value2(context)]
     // eslint-disable-next-line eqeqeq
-    const neq = (value1, value2, context) => value1(context) != value2(context)
-    const eqq = (value1, value2, context) => value1(context) === value2(context)
-    const neqq = (value1, value2, context) => value1(context) !== value2(context)
-    const and = (value1, value2, context) => value1(context) && value2(context)
-    const or = (value1, value2, context) => value1(context) || value2(context)
-    const ternary = (condition, trueValue, falseValue, context) => {
+    const neq = ['neq', (value1, value2, context) => value1(context) != value2(context)]
+    const eqq = ['eqq', (value1, value2, context) => value1(context) === value2(context)]
+    const neqq = ['neqq', (value1, value2, context) => value1(context) !== value2(context)]
+    const and = ['and', (value1, value2, context) => value1(context) && value2(context)]
+    const or = ['or', (value1, value2, context) => value1(context) || value2(context)]
+    const ternary = ['ternary', (condition, trueValue, falseValue, context) => {
       if (condition(context)) {
         return trueValue(context)
       }
       return falseValue(context)
-    }
-    const getTypeof = (value, context) => typeof value(context)
-    const call = (member, args, context) => member(context).apply(null, args.map(arg => arg(context)))
+    }]
+    const getTypeof = ['getTypeof', (value, context) => typeof value(context)]
+    const call = ['call', (member, args, context) => member(context).apply(null, args.map(arg => arg(context)))]
 
     const checkNotEndOfExpression = (tokens) => {
       if (tokens.length === 0) {
