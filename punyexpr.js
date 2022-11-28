@@ -5,7 +5,7 @@
   const TOKEN_TYPE_IDENTIFIER = 'identifier'
   const TOKEN_TYPE_SYMBOL = 'symbol'
   const FUNCTION = 'function'
-
+  
   class PunyExprError extends Error {
     constructor (name, message, offset) {
       super(message)
@@ -269,19 +269,24 @@
     const offset = (tokens) => current(tokens)[2]
     const shift = (tokens, steps = 1) => tokens.splice(0, steps)
     const isSymbol = (tokens, expected = undefined) => {
-      const [type, value] = tokens[0] || []
+      if (tokens.length === 0) {
+        return false
+      }
+      const [type, value] = tokens[0]
       return (type === TOKEN_TYPE_SYMBOL) && (!expected || expected.includes(value))
     }
     const shiftOnSymbols = (tokens, expected) => {
-      const maxLength = expected.reduce((length, symbol) => Math.max(length, symbol.length), 0)
-      const nextTokens = tokens.slice(0, maxLength)
-      let notASymbolIndex = nextTokens.findIndex(([type]) => type !== TOKEN_TYPE_SYMBOL)
-      if (notASymbolIndex === -1) {
-        notASymbolIndex = nextTokens.length
+      const nextSymbols = []
+      for (const token of tokens) {
+        const [type, value] = token
+        if (type !== TOKEN_TYPE_SYMBOL) {
+          break
+        }
+        nextSymbols.push(value)
       }
-      const nextSymbols = nextTokens.slice(0, notASymbolIndex).map(([, value]) => value).join('')
+      const nextSymbolsAggregated = nextSymbols.join('')
       const matching = expected
-        .filter(symbol => nextSymbols.startsWith(symbol))
+        .filter(symbol => nextSymbolsAggregated.startsWith(symbol))
         .sort((a, b) => b.length - a.length)[0]
       if (matching) {
         shift(tokens, matching.length)
@@ -432,9 +437,6 @@
 
     const conditionalExpression = (tokens) => {
       const condition = logicalORExpression(tokens)
-      if (tokens.length === 0) {
-        return condition
-      }
       if (shiftOnSymbols(tokens, ['?'])) {
         const trueResult = conditionalExpression(tokens)
         checkNotEndOfExpression(tokens)
