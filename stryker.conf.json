@@ -12,6 +12,9 @@
     "punyexpr.js"
   ],
   "jest": {
-    "enableFindRelatedTests": false
+    "enableFindRelatedTests": false,
+    "config": {
+      "setupFilesAfterEnv": ["./tests/source.js"]
+    }
   }
 }
