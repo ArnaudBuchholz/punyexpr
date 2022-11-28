@@ -11,7 +11,7 @@ window.addEventListener('load', () => {
     output.innerHTML = ''
     try {
       const expr = method(input.value)
-      output.appendChild(document.createTextNode(expr()))
+      output.appendChild(document.createTextNode(expr() + '\n' + JSON.stringify(expr.toJSON(), undefined, 2)))
     } catch (e) {
       output.appendChild(document.createTextNode(e.toString()))
     }
