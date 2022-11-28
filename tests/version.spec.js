@@ -2,6 +2,10 @@
 
 describe('version', () => {
   it('exposes the version information', () => {
-    expect(punyexpr.version).toBe('0.0.0') // replaced during build
+    expect(punyexpr.version).toBe(global.expectedVersion)
+  })
+
+  it('is readonly', () => {
+    expect(() => { punyexpr.version = 'test' }).toThrowError()
   })
 })
