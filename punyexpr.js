@@ -486,13 +486,7 @@
 
   const punyexpr = str => {
     const impl = parse(tokenize(str))
-    function expr (context = {}) {
-      try {
-        return impl(context)
-      } catch (e) {
-        return ''
-      }
-    }
+    const expr = (context = {}) => impl(context)
     assignROProperties(expr, {
       toJSON: toJSON.bind(null, impl),
       toString: () => str
