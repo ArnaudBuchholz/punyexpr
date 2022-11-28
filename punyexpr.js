@@ -4,6 +4,7 @@
   const TOKEN_TYPE_LITERAL = 'literal'
   const TOKEN_TYPE_IDENTIFIER = 'identifier'
   const TOKEN_TYPE_SYMBOL = 'symbol'
+  const FUNCTION = 'function'
 
   class PunyExprError extends Error {
     constructor (name, message, offset) {
@@ -473,6 +474,16 @@
     )
   }
 
+  const toJSON = expr => ({
+    [expr.op]: expr.args.map(
+      arg => typeof arg === FUNCTION
+        ? toJSON(arg)
+        : Array.isArray(arg)
+          ? arg.map(toJSON)
+          : arg
+    )
+  })
+
   const punyexpr = str => {
     const impl = parse(tokenize(str))
     function expr (context = {}) {
@@ -483,8 +494,8 @@
       }
     }
     assignROProperties(expr, {
-      impl,
-      str
+      toJSON: toJSON.bind(null, impl),
+      toString: () => str
     })
     return expr
   }
