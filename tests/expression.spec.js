@@ -1,15 +1,5 @@
 'use strict'
 
-const jsonify = expr => ({
-  [expr.op]: expr.args.map(
-    arg => typeof arg === 'function'
-      ? jsonify(arg)
-      : Array.isArray(arg)
-        ? arg.map(jsonify)
-        : arg
-  )
-})
-
 describe('expression', () => {
   it('builds a function', () => {
     const expr = punyexpr('1 + 1')
@@ -50,13 +40,13 @@ describe('expression', () => {
         } else if (exceptionCaught) {
           throw exceptionCaught
         } else {
-          expect(expr.str).toBe(expression)
-          const jsonified = jsonify(expr.impl)
+          expect(expr.toString()).toBe(expression)
+          const exprAsJson = expr.toJSON()
           if (verbose) {
-            console.log(JSON.stringify(jsonified, undefined, 2))
+            console.log(JSON.stringify(exprAsJson, undefined, 2))
           }
           if (json) {
-            expect(jsonified).toStrictEqual(json)
+            expect(exprAsJson).toStrictEqual(json)
           }
           expect(expr(context)).toBe(expected)
         }
@@ -191,8 +181,8 @@ describe('expression', () => {
         expected: 1
       },
       '2 < 2': {
-        lt: {
-          remainder: [
+        json: {
+          lt: [
             { constant: [2] },
             { constant: [2] }
           ]
@@ -200,8 +190,8 @@ describe('expression', () => {
         expected: false
       },
       '1 < 2': {
-        lt: {
-          remainder: [
+        json: {
+          lt: [
             { constant: [1] },
             { constant: [2] }
           ]
@@ -209,8 +199,8 @@ describe('expression', () => {
         expected: true
       },
       '2 < 1': {
-        lt: {
-          remainder: [
+        json: {
+          lt: [
             { constant: [2] },
             { constant: [1] }
           ]
@@ -218,8 +208,8 @@ describe('expression', () => {
         expected: false
       },
       '2 <= 2': {
-        lte: {
-          remainder: [
+        json: {
+          lte: [
             { constant: [2] },
             { constant: [2] }
           ]
@@ -227,8 +217,8 @@ describe('expression', () => {
         expected: true
       },
       '1 <= 2': {
-        lte: {
-          remainder: [
+        json: {
+          lte: [
             { constant: [1] },
             { constant: [2] }
           ]
@@ -236,8 +226,8 @@ describe('expression', () => {
         expected: true
       },
       '2 <= 1': {
-        lte: {
-          remainder: [
+        json: {
+          lte: [
             { constant: [2] },
             { constant: [1] }
           ]
@@ -245,8 +235,8 @@ describe('expression', () => {
         expected: false
       },
       '2 > 2': {
-        gt: {
-          remainder: [
+        json: {
+          gt: [
             { constant: [2] },
             { constant: [2] }
           ]
@@ -254,8 +244,8 @@ describe('expression', () => {
         expected: false
       },
       '1 > 2': {
-        gt: {
-          remainder: [
+        json: {
+          gt: [
             { constant: [1] },
             { constant: [2] }
           ]
@@ -263,8 +253,8 @@ describe('expression', () => {
         expected: false
       },
       '2 > 1': {
-        gt: {
-          remainder: [
+        json: {
+          gt: [
             { constant: [2] },
             { constant: [1] }
           ]
@@ -272,8 +262,8 @@ describe('expression', () => {
         expected: true
       },
       '2 >= 2': {
-        gte: {
-          remainder: [
+        json: {
+          gte: [
             { constant: [2] },
             { constant: [2] }
           ]
@@ -281,8 +271,8 @@ describe('expression', () => {
         expected: true
       },
       '1 >= 2': {
-        gte: {
-          remainder: [
+        json: {
+          gte: [
             { constant: [1] },
             { constant: [2] }
           ]
@@ -290,8 +280,8 @@ describe('expression', () => {
         expected: false
       },
       '2 >= 1': {
-        lte: {
-          remainder: [
+        json: {
+          gte: [
             { constant: [2] },
             { constant: [1] }
           ]
