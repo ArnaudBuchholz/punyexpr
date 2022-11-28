@@ -1,7 +1,7 @@
 # punyexpr 🦴
 
 [![Node.js CI](https://github.com/ArnaudBuchholz/punyexpr/actions/workflows/node.js.yml/badge.svg)](https://github.com/ArnaudBuchholz/punyexpr/actions/workflows/node.js.yml)
-[![Mutation Testing](https://img.shields.io/badge/mutation%20testing-95%25-green)](https://arnaudbuchholz.github.io/punyexpr/reports/mutation/mutation.html)
+[![Mutation Testing](https://img.shields.io/badge/mutation%20testing-100%25-green)](https://arnaudbuchholz.github.io/punyexpr/reports/mutation/mutation.html)
 [![Package Quality](https://npm.packagequality.com/shield/punyexpr.svg)](https://packagequality.com/#?package=punyexpr)
 [![Known Vulnerabilities](https://snyk.io/test/github/ArnaudBuchholz/punyexpr/badge.svg?targetFile=package.json)](https://snyk.io/test/github/ArnaudBuchholz/punyexpr?targetFile=package.json)
 [![punyexpr](https://badge.fury.io/js/punyexpr.svg)](https://www.npmjs.org/package/punyexpr)
