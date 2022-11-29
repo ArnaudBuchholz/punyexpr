@@ -32,11 +32,11 @@ const incValue = punyexpr('value + 1')
 incValue({ value: 1 }) // 2
 ``` 
 
-## Use with [punybind](https://www.npmjs.com/package/punybind)@`1.2.0`
+## Use with [punybind](https://www.npmjs.com/package/punybind)@`>=1.2.0`
 
 ```javascript
-// Use before binding
-punybind.compiler(punyexpr)
+const safepunybind = punybind.use(punyexpr)
+// Use safepunybind to bind HTML
 ```
 
 ## Implementation notes
