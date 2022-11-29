@@ -5,7 +5,7 @@
   const TOKEN_TYPE_IDENTIFIER = 'identifier'
   const TOKEN_TYPE_SYMBOL = 'symbol'
   const FUNCTION = 'function'
-  
+
   class PunyExprError extends Error {
     constructor (name, message, offset) {
       super(message)
@@ -115,8 +115,8 @@
 
   MemberExpression :
     PrimaryExpression
-    MemberExpression [ Expression ] 💬 should we bind ?
-    ⚠️MemberExpression . Identifier 💬 should we bind ?
+    MemberExpression [ Expression ] 💬 If result is a function, it is bound to the MemberExpression
+    ⚠️MemberExpression . Identifier 💬 If result is a function, it is bound to the MemberExpression
     ⛔MemberExpression TemplateLiteral
     ⛔SuperProperty
     ⛔MetaProperty
@@ -126,7 +126,7 @@
    ⛔NewExpression :
     ⛔new NewExpression
 
-  ⚠️CallExpression : 💬 does not support this call
+  ⚠️CallExpression : 💬 Supports this call thanks to binding
     MemberExpression
     MemberExpression ( )
     MemberExpression ( AssignmentExpression ⟮, AssignmentExpression⟯∗ )
@@ -228,7 +228,15 @@
 
     const constant = ['constant', value => value]
     const rootGet = ['rootGet', (member, context) => context[member(context)]]
-    const get = ['get', (object, member, context) => object(context)[member(context)]]
+    const get = ['get', (object, member, context) => {
+      const that = object(context)
+      const result = that[member(context)]
+      // eslint-disable-next-line valid-typeof
+      if (typeof result === FUNCTION) {
+        return result.bind(that)
+      }
+      return result
+    }]
     const not = ['not', (value, context) => !value(context)]
     const mul = ['mul', (value1, value2, context) => value1(context) * value2(context)]
     const div = ['div', (value1, value2, context) => value1(context) / value2(context)]
@@ -478,6 +486,7 @@
 
   const toJSON = expr => ({
     [expr.op]: expr.args.map(
+      // eslint-disable-next-line valid-typeof
       arg => typeof arg === FUNCTION
         ? toJSON(arg)
         : Array.isArray(arg)
