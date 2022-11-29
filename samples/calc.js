@@ -17,5 +17,6 @@ window.addEventListener('load', () => {
     }
   })
   onClick(exprButton, punyexpr)
+  // eslint-disable-next-line no-eval
   onClick(evalButton, eval)
 })
