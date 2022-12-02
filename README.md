@@ -35,8 +35,10 @@ incValue({ value: 1 }) // 2
 ## Use with [punybind](https://www.npmjs.com/package/punybind)@`>=1.2.0`
 
 ```javascript
-const safepunybind = punybind.use(punyexpr)
-// Use safepunybind to bind HTML
+const safebind = punybind.use({
+  compiler: punyexpr
+ })
+// Use safebind to bind HTML
 ```
 
 ## Implementation notes
