@@ -109,6 +109,11 @@
     Literal
     ⛔ArrayLiteral
     ⛔ObjectLiteral
+    ⛔FunctionExpression
+    ⛔ClassExpression
+    ⛔GeneratorExpression
+    ⛔AsyncFunctionExpression
+    ⛔AsyncGeneratorExpression
     ⛔RegularExpressionLiteral
     ⛔TemplateLiteral
     ⚠️( Expression )
