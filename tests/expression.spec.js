@@ -649,6 +649,27 @@ describe('expression', () => {
           ]
         },
         expected: '2.00'
+      },
+      '(2).toFixed(2).endsWith("00")': {
+        json: {
+          call: [
+            {
+              call: [
+                {
+                  get: [
+                    { constant: [2] },
+                    { constant: ['toFixed'] }
+                  ]
+                },
+                [
+                  { constant: [2] }
+                ]
+              ]
+            },
+            [{ constant: ['00'] }]
+          ]
+        },
+        expected: true
       }
     })
   })
