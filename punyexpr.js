@@ -99,66 +99,33 @@
 
   (Extremely) Simplified grammar (based on https://tc39.es/ecma262/#sec-expressions)
 
-  ⛔ Not implemented
-  ⚠️ Modified / adapted
+  ⛔ Not yet implemented
   ➡️ Shortcut
 
   PrimaryExpression :
-    ⛔this
-    ⚠️Identifier
+    Identifier
     Literal
     ⛔ArrayLiteral
     ⛔ObjectLiteral
-    ⛔FunctionExpression
-    ⛔ClassExpression
-    ⛔GeneratorExpression
-    ⛔AsyncFunctionExpression
-    ⛔AsyncGeneratorExpression
-    ⛔RegularExpressionLiteral
-    ⛔TemplateLiteral
-    ⚠️( Expression )
+    ( Expression )
 
-  MemberExpression :
+  CallOrMemberExpression : 💬 Supports this call thanks to binding
     PrimaryExpression
-    MemberExpression [ Expression ] 💬 If result is a function, it is bound to the MemberExpression
-    ⚠️MemberExpression . Identifier 💬 If result is a function, it is bound to the MemberExpression
-    ⛔MemberExpression TemplateLiteral
-    ⛔SuperProperty
-    ⛔MetaProperty
-    ⛔new MemberExpression Arguments
-    ⛔MemberExpression . PrivateIdentifier
-
-   ⛔NewExpression :
-    ⛔new NewExpression
-
-  ⚠️CallExpression : 💬 Supports this call thanks to binding
-    MemberExpression
-    MemberExpression ( )
-    MemberExpression ( AssignmentExpression ⟮, AssignmentExpression⟯∗ )
-
-  LeftHandSideExpression :
-    CallExpression
-    ⛔OptionalExpression
-
-  ⛔UpdateExpression : ➡️ CallExpression
-    ⛔LeftHandSideExpression ++
-    ⛔LeftHandSideExpression --
-    ⛔++ UnaryExpression
-    ⛔-- UnaryExpression
+    CallOrMemberExpression ( )
+    CallOrMemberExpression ( Expression ⟮, Expression )
+    CallOrMemberExpression [ Expression ] 💬 If result is a function, it is bound to the left part
+    CallOrMemberExpression . Identifier 💬 If result is a function, it is bound to the left part
 
   UnaryExpression :
-    UpdateExpression
-    ⛔delete UnaryExpression
-    ⛔void UnaryExpression
+    CallExpression
     typeof UnaryExpression
     + UnaryExpression
     - UnaryExpression
     ⛔~ UnaryExpression
     ! UnaryExpression
-    ⛔AwaitExpression
 
   ExponentiationExpression :
-    ⚠️UnaryExpression ** ExponentiationExpression
+    UnaryExpression ** ExponentiationExpression
 
   MultiplicativeExpression :
     MultiplicativeExpression * ExponentiationExpression
@@ -215,19 +182,8 @@
     ShortCircuitExpression
     ShortCircuitExpression ? AssignmentExpression : AssignmentExpression
 
-  ⛔AssignmentExpression : ➡️ ConditionalExpression
-    ConditionalExpression
-    ⛔YieldExpression
-    ⛔ArrowFunction
-    ⛔AsyncArrowFunction
-    ⛔LeftHandSideExpression = AssignmentExpression
-    ⛔LeftHandSideExpression AssignmentOperator AssignmentExpression
-    ⛔LeftHandSideExpression &&= AssignmentExpression
-    ⛔LeftHandSideExpression ||= AssignmentExpression
-    ⛔LeftHandSideExpression ??= AssignmentExpression
-
   Expression :
-    ⚠️AssignmentExpression
+    ConditionalExpression
 */
     const bind = (impl, ...args) => Object.assign(impl[1].bind(null, ...args), { op: impl[0], args })
 
@@ -323,8 +279,17 @@
       }
     }
 
-    const literal = (tokens) => {
+    const primaryExpression = (tokens) => {
       checkNotEndOfExpression(tokens)
+      if (isSymbol(tokens, '(')) {
+        shift(tokens)
+        const result = expression(tokens)
+        if (!isSymbol(tokens, ')')) {
+          unexpected(tokens)
+        }
+        shift(tokens)
+        return result
+      }
       if (isSymbol(tokens)) {
         unexpected(tokens)
       }
@@ -335,67 +300,52 @@
       return bind(constant, value)
     }
 
-    const primaryExpression = (tokens) => {
-      if (isSymbol(tokens, '(')) {
-        shift(tokens)
-        const result = expression(tokens)
-        if (!isSymbol(tokens, ')')) {
-          unexpected(tokens)
-        }
-        shift(tokens)
-        return result
-      }
-      return literal(tokens)
-    }
-
-    const memberExpression = (tokens) => {
+    const CallOrMemberExpression = (tokens) => {
       let result = primaryExpression(tokens)
-      while (isSymbol(tokens, '[.')) {
-        const [[, value]] = shift(tokens)
-        if (value === '.') {
-          const [type, value] = current(tokens)
-          if (type !== TOKEN_TYPE_IDENTIFIER) {
-            unexpected(tokens)
+      const operators = {
+        '(': () => {
+          const args = []
+          while (!isSymbol(tokens, ')')) {
+            if (args.length > 0) {
+              if (!isSymbol(tokens, ',')) {
+                unexpected(tokens)
+              }
+              shift(tokens)
+            }
+            args.push(expression(tokens))
           }
           shift(tokens)
-          result = bind(get, result, bind(constant, value))
-        } else {
+          result = bind(call, result, args)
+        },
+        '[': () => {
           const member = expression(tokens)
           if (!isSymbol(tokens, ']')) {
             unexpected(tokens)
           }
           shift(tokens)
           result = bind(get, result, member)
+        },
+        '.': () => {
+          const [type, value] = current(tokens)
+          if (type !== TOKEN_TYPE_IDENTIFIER) {
+            unexpected(tokens)
+          }
+          shift(tokens)
+          result = bind(get, result, bind(constant, value))
         }
+      }
+      while (isSymbol(tokens, '([.')) {
+        const [[, symbol]] = shift(tokens)
+        operators[symbol](result)
       }
       return result
-    }
-
-    const callExpression = (tokens) => {
-      const member = memberExpression(tokens)
-      if (isSymbol(tokens, '(')) {
-        shift(tokens)
-        const args = []
-        while (!isSymbol(tokens, ')')) {
-          if (args.length > 0) {
-            if (!isSymbol(tokens, ',')) {
-              unexpected(tokens)
-            }
-            shift(tokens)
-          }
-          args.push(conditionalExpression(tokens))
-        }
-        shift(tokens)
-        return bind(call, member, args)
-      }
-      return member
     }
 
     const unaryExpression = (tokens) => {
       const [type, value] = current(tokens)
       const postProcess = isSymbol(tokens, '+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
       if (!postProcess) {
-        return callExpression(tokens)
+        return CallOrMemberExpression(tokens)
       }
       shift(tokens)
       let result = expression(tokens)
