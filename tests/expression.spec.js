@@ -654,19 +654,26 @@ describe('expression', () => {
         json: {
           call: [
             {
-              call: [
+              get: [
                 {
-                  get: [
-                    { constant: [2] },
-                    { constant: ['toFixed'] }
+                  call: [
+                    {
+                      get: [
+                        { constant: [2] },
+                        { constant: ['toFixed'] }
+                      ]
+                    },
+                    [
+                      { constant: [2] }
+                    ]
                   ]
                 },
-                [
-                  { constant: [2] }
-                ]
+                { constant: ['endsWith'] }
               ]
             },
-            [{ constant: ['00'] }]
+            [
+              { constant: ['00'] }
+            ]
           ]
         },
         expected: true
