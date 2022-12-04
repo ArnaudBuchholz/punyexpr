@@ -1,14 +1,30 @@
 <html>
   <head>
+    <title>punyexpr &#129460;</title>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src https://*; child-src 'none';"
-    />
+      content="
+default-src 'self';
+img-src https://*;
+style-src-elem 'self' https://unpkg.com/;
+child-src 'none';
+    "/>
     <script src="../dist/punyexpr.js"></script>
     <script src="calc.js"></script>
+    <link href="https://unpkg.com/treeflex/dist/css/treeflex.css" rel="stylesheet">    
+    <link rel="stylesheet" href="calc.css">
   </head>
   <body>
-    <input type="text"><button id="punyexpr">punyexpr</button><button id="eval">eval</button>
-    <pre></pre>
+    <input type="text"><button id="punyexpr">&#9193;</button>
+    <span class="output"></span>
+    <div class="credit">
+      <ul>
+        <li>Expression compiler and evaluator : <a href="https://www.npmjs.com/package/punyexpr" target="_blank" rel="noopener noreferrer">punyexpr</a></li>
+        <li>Tree visualization based on <a href="https://dumptyd.github.io/treeflex/" target="_blank" rel="noopener noreferrer">treeflex</a></li>
+      </ul>
+    </div>
+    <div class="tf-tree ast">
+      <ul></ul>
+    </div>
   </body>
 </html>
