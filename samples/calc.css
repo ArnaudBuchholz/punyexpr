@@ -1,0 +1,23 @@
+button {
+  margin: 0 1rem 0 1rem;
+}
+
+span.output {
+  font-weight: bold;
+}
+
+div.tf-tree {
+  margin: 1rem;
+}
+
+.ast.tf-tree {
+  font-size: 14px;
+}
+
+.ast .op > span {
+  font-weight: bold;
+}
+
+.ast .constant > span {
+  border-radius: 50%;
+}
