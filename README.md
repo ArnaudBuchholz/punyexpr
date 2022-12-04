@@ -12,6 +12,10 @@
 
 A minimalist *(⇡ check the install size)* expression compiler and evaluator.
 
+## Live demo
+
+https://arnaudbuchholz.github.io/punyexpr/samples/calc.html
+
 ## Usage
 
 ### 1. Include the punyexpr helper
