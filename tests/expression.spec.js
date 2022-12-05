@@ -638,7 +638,7 @@ describe('expression', () => {
         json: {
           call: [
             {
-              get: [
+              property: [
                 { constant: [2] },
                 { constant: ['toFixed'] }
               ]
@@ -654,11 +654,11 @@ describe('expression', () => {
         json: {
           call: [
             {
-              get: [
+              property: [
                 {
                   call: [
                     {
-                      get: [
+                      property: [
                         { constant: [2] },
                         { constant: ['toFixed'] }
                       ]
@@ -685,7 +685,7 @@ describe('expression', () => {
     process({
       hello: {
         json: {
-          rootGet: [
+          context: [
             { constant: ['hello'] }
           ]
         },
@@ -693,9 +693,9 @@ describe('expression', () => {
       },
       'object.property1': {
         json: {
-          get: [
+          property: [
             {
-              rootGet: [
+              context: [
                 { constant: ['object'] }
               ]
             },
@@ -706,9 +706,9 @@ describe('expression', () => {
       },
       'object["property1"]': {
         json: {
-          get: [
+          property: [
             {
-              rootGet: [
+              context: [
                 { constant: ['object'] }
               ]
             },
@@ -721,9 +721,9 @@ describe('expression', () => {
         json: {
           call: [
             {
-              get: [
+              property: [
                 {
-                  rootGet: [
+                  context: [
                     { constant: ['object'] }
                   ]
                 },
@@ -739,9 +739,9 @@ describe('expression', () => {
         json: {
           call: [
             {
-              get: [
+              property: [
                 {
-                  rootGet: [
+                  context: [
                     { constant: ['object'] }
                   ]
                 },
@@ -759,9 +759,9 @@ describe('expression', () => {
         json: {
           call: [
             {
-              get: [
+              property: [
                 {
-                  rootGet: [
+                  context: [
                     { constant: ['object'] }
                   ]
                 },
