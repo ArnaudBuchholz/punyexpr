@@ -86,7 +86,7 @@
         }
         lastTokenType = type
         if (type !== undefined) {
-          tokens.push([type, value, offset])
+          tokens.push([type, value, offset, match.length])
         }
         offset += capturedValue.length
       })
@@ -185,13 +185,15 @@
   Expression :
     ConditionalExpression
 */
-    const bind = (impl, ...args) => Object.assign(impl[1].bind(null, ...args), { op: impl[0], args })
+    const bind = (impl, ...args) => Object.assign(impl[1].bind(null, ...args), { $: [impl[0], args] })
+    const buildOp = (name, impl) => (range, ...args) => Object.assign(impl.bind(null, ...args), { $: [name, args, range] })
 
-    const constant = ['constant', value => value]
-    const rootGet = ['rootGet', (member, context) => context[member(context)]]
-    const get = ['get', (object, member, context) => {
+    const constant = buildOp('constant', value => value)
+
+    const contextProperty = ['context', (name, context) => context[name(context)]]
+    const property = ['property', (object, name, context) => {
       const that = object(context)
-      const result = that[member(context)]
+      const result = that[name(context)]
       // eslint-disable-next-line valid-typeof
       if (typeof result === FUNCTION) {
         return result.bind(that)
@@ -224,7 +226,7 @@
       return falseValue(context)
     }]
     const getTypeof = ['getTypeof', (value, context) => typeof value(context)]
-    const call = ['call', (member, args, context) => member(context).apply(null, args.map(arg => arg(context)))]
+    const call = ['call', (func, args, context) => func(context).apply(null, args.map(arg => arg(context)))]
 
     const checkNotEndOfExpression = (tokens) => {
       if (tokens.length === 0) {
@@ -293,11 +295,11 @@
       if (isSymbol(tokens)) {
         unexpected(tokens)
       }
-      const [[type, value]] = shift(tokens)
+      const [[type, value, ...range]] = shift(tokens)
       if (type === TOKEN_TYPE_IDENTIFIER) {
-        return bind(rootGet, bind(constant, value))
+        return bind(contextProperty, constant(range, value))
       }
-      return bind(constant, value)
+      return constant(range, value)
     }
 
     const CallOrMemberExpression = (tokens) => {
@@ -318,20 +320,20 @@
           result = bind(call, result, args)
         },
         '[': () => {
-          const member = expression(tokens)
+          const name = expression(tokens)
           if (!isSymbol(tokens, ']')) {
             unexpected(tokens)
           }
           shift(tokens)
-          result = bind(get, result, member)
+          result = bind(property, result, name)
         },
         '.': () => {
-          const [type, value] = current(tokens)
+          const [type, value, ...range] = current(tokens)
           if (type !== TOKEN_TYPE_IDENTIFIER) {
             unexpected(tokens)
           }
           shift(tokens)
-          result = bind(get, result, bind(constant, value))
+          result = bind(property, result, constant(range, value))
         }
       }
       while (isSymbol(tokens, '([.')) {
@@ -350,9 +352,9 @@
       shift(tokens)
       let result = expression(tokens)
       if (value === '+') {
-        result = bind(add, bind(constant, 0), result)
+        result = bind(add, constant([], 0), result)
       } else if (value === '-') {
-        result = bind(sub, bind(constant, 0), result)
+        result = bind(sub, constant([], 0), result)
       } else if (value === '!') {
         result = bind(not, result)
       } else {
@@ -440,7 +442,7 @@
   }
 
   const toJSON = expr => ({
-    [expr.op]: expr.args.map(
+    [expr.$[0]]: expr.$[1].map(
       // eslint-disable-next-line valid-typeof
       arg => typeof arg === FUNCTION
         ? toJSON(arg)
