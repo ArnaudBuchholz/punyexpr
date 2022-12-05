@@ -27,35 +27,35 @@ describe('tokenizer', () => {
 
   describe('basic', () => {
     process({
-      '\'a\'': [['literal', 'a', 0]],
-      '\'a\\\'b\'': [['literal', 'a\'b', 0]],
-      '"a"': [['literal', 'a', 0]],
-      '"a\\"b"': [['literal', 'a"b', 0]],
+      '\'a\'': [['literal', 'a', 0, 3]],
+      '\'a\\\'b\'': [['literal', 'a\'b', 0, 6]],
+      '"a"': [['literal', 'a', 0, 3]],
+      '"a\\"b"': [['literal', 'a"b', 0, 6]],
 
-      1: [['literal', 1, 0]],
-      '1.0': [['literal', 1, 0]],
-      '1.': [['literal', 1, 0]],
-      123: [['literal', 123, 0]],
-      1.23: [['literal', 1.23, 0]],
-      '.123': [['literal', 0.123, 0]],
+      1: [['literal', 1, 0, 1]],
+      '1.0': [['literal', 1, 0, 3]],
+      '1.': [['literal', 1, 0, 2]],
+      123: [['literal', 123, 0, 3]],
+      1.23: [['literal', 1.23, 0, 4]],
+      '.123': [['literal', 0.123, 0, 4]],
 
-      true: [['literal', true, 0]],
-      false: [['literal', false, 0]],
-      undefined: [['literal', undefined, 0]],
-      null: [['literal', null, 0]],
+      true: [['literal', true, 0, 4]],
+      false: [['literal', false, 0, 5]],
+      undefined: [['literal', undefined, 0, 9]],
+      null: [['literal', null, 0, 4]],
 
-      a: [['identifier', 'a', 0]],
-      _a: [['identifier', '_a', 0]],
-      A: [['identifier', 'A', 0]],
-      _A: [['identifier', '_A', 0]],
-      abc: [['identifier', 'abc', 0]],
-      abc_def: [['identifier', 'abc_def', 0]],
-      abc123: [['identifier', 'abc123', 0]],
+      a: [['identifier', 'a', 0, 1]],
+      _a: [['identifier', '_a', 0, 2]],
+      A: [['identifier', 'A', 0, 1]],
+      _A: [['identifier', '_A', 0, 2]],
+      abc: [['identifier', 'abc', 0, 3]],
+      abc_def: [['identifier', 'abc_def', 0, 7]],
+      abc123: [['identifier', 'abc123', 0, 6]],
 
-      typeof: [['identifier', 'typeof', 0]],
+      typeof: [['identifier', 'typeof', 0, 6]],
 
       ...'+-*/[].?:%<=>!&|(),'.split('').reduce((dict, symbol) => {
-        dict[symbol] = [['symbol', symbol, 0]]
+        dict[symbol] = [['symbol', symbol, 0, 1]]
         return dict
       }, {})
     })
@@ -63,16 +63,16 @@ describe('tokenizer', () => {
 
   describe('combining', () => {
     process({
-      '1+1': [['literal', 1, 0], ['symbol', '+', 1], ['literal', 1, 2]],
-      '1 +  1': [['literal', 1, 0], ['symbol', '+', 2], ['literal', 1, 5]],
-      '1\t+\n1': [['literal', 1, 0], ['symbol', '+', 2], ['literal', 1, 4]],
+      '1+1': [['literal', 1, 0, 1], ['symbol', '+', 1, 1], ['literal', 1, 2, 1]],
+      '1 +  1': [['literal', 1, 0, 1], ['symbol', '+', 2, 1], ['literal', 1, 5, 1]],
+      '1\t+\n1': [['literal', 1, 0, 1], ['symbol', '+', 2, 1], ['literal', 1, 4, 1]],
       'items[step].member': [
-        ['identifier', 'items', 0],
-        ['symbol', '[', 5],
-        ['identifier', 'step', 6],
-        ['symbol', ']', 10],
-        ['symbol', '.', 11],
-        ['identifier', 'member', 12]
+        ['identifier', 'items', 0, 5],
+        ['symbol', '[', 5, 1],
+        ['identifier', 'step', 6, 4],
+        ['symbol', ']', 10, 1],
+        ['symbol', '.', 11, 1],
+        ['identifier', 'member', 12, 6]
       ]
     })
   })
