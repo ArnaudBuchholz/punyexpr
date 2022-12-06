@@ -185,13 +185,11 @@
   Expression :
     ConditionalExpression
 */
-    const bind = (impl, ...args) => Object.assign(impl[1].bind(null, ...args), { $: [impl[0], args] })
     const buildOp = (name, impl) => (range, ...args) => Object.assign(impl.bind(null, ...args), { $: [name, args, range] })
 
     const constant = buildOp('constant', value => value)
-
-    const contextProperty = ['context', (name, context) => context[name(context)]]
-    const property = ['property', (object, name, context) => {
+    const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
+    const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
       const result = that[name(context)]
       // eslint-disable-next-line valid-typeof
@@ -199,34 +197,35 @@
         return result.bind(that)
       }
       return result
-    }]
-    const not = ['not', (value, context) => !value(context)]
-    const mul = ['mul', (value1, value2, context) => value1(context) * value2(context)]
-    const div = ['div', (value1, value2, context) => value1(context) / value2(context)]
-    const exp = ['exp', (value1, value2, context) => value1(context) ** value2(context)]
-    const remainder = ['remainder', (value1, value2, context) => value1(context) % value2(context)]
-    const add = ['add', (value1, value2, context) => value1(context) + value2(context)]
-    const sub = ['sub', (value1, value2, context) => value1(context) - value2(context)]
-    const lt = ['lt', (value1, value2, context) => value1(context) < value2(context)]
-    const gt = ['gt', (value1, value2, context) => value1(context) > value2(context)]
-    const lte = ['lte', (value1, value2, context) => value1(context) <= value2(context)]
-    const gte = ['gte', (value1, value2, context) => value1(context) >= value2(context)]
+    })
+    const callFunction = buildOp('call', (func, args, context) => func(context).apply(null, args.map(arg => arg(context))))
+    const neg = buildOp('neg', (value, context) => -value(context))
+    const not = buildOp('not', (value, context) => !value(context))
+    const getTypeof = buildOp('getTypeof', (value, context) => typeof value(context))
+    const exp = buildOp('exp', (value1, value2, context) => value1(context) ** value2(context))
+    const mul = buildOp('mul', (value1, value2, context) => value1(context) * value2(context))
+    const div = buildOp('div', (value1, value2, context) => value1(context) / value2(context))
+    const remainder = buildOp('remainder', (value1, value2, context) => value1(context) % value2(context))
+    const add = buildOp('add', (value1, value2, context) => value1(context) + value2(context))
+    const sub = buildOp('sub', (value1, value2, context) => value1(context) - value2(context))
+    const lt = buildOp('lt', (value1, value2, context) => value1(context) < value2(context))
+    const gt = buildOp('gt', (value1, value2, context) => value1(context) > value2(context))
+    const lte = buildOp('lte', (value1, value2, context) => value1(context) <= value2(context))
+    const gte = buildOp('gte', (value1, value2, context) => value1(context) >= value2(context))
     // eslint-disable-next-line eqeqeq
-    const eq = ['eq', (value1, value2, context) => value1(context) == value2(context)]
+    const eq = buildOp('eq', (value1, value2, context) => value1(context) == value2(context))
     // eslint-disable-next-line eqeqeq
-    const neq = ['neq', (value1, value2, context) => value1(context) != value2(context)]
-    const eqq = ['eqq', (value1, value2, context) => value1(context) === value2(context)]
-    const neqq = ['neqq', (value1, value2, context) => value1(context) !== value2(context)]
-    const and = ['and', (value1, value2, context) => value1(context) && value2(context)]
-    const or = ['or', (value1, value2, context) => value1(context) || value2(context)]
-    const ternary = ['ternary', (condition, trueValue, falseValue, context) => {
+    const neq = buildOp('neq', (value1, value2, context) => value1(context) != value2(context))
+    const eqq = buildOp('eqq', (value1, value2, context) => value1(context) === value2(context))
+    const neqq = buildOp('neqq', (value1, value2, context) => value1(context) !== value2(context))
+    const and = buildOp('and', (value1, value2, context) => value1(context) && value2(context))
+    const or = buildOp('or', (value1, value2, context) => value1(context) || value2(context))
+    const ternary = buildOp('ternary', (condition, trueValue, falseValue, context) => {
       if (condition(context)) {
         return trueValue(context)
       }
       return falseValue(context)
-    }]
-    const getTypeof = ['getTypeof', (value, context) => typeof value(context)]
-    const call = ['call', (func, args, context) => func(context).apply(null, args.map(arg => arg(context)))]
+    })
 
     const checkNotEndOfExpression = (tokens) => {
       if (tokens.length === 0) {
@@ -238,6 +237,16 @@
       return tokens[0]
     }
     const offset = (tokens) => current(tokens)[2]
+    const range = (tokensOrOp, from) => {
+      let currentRange
+      if (Array.isArray(tokensOrOp)) {
+        currentRange = current(tokensOrOp).splice(2)
+      } else {
+        currentRange = tokensOrOp.$[2]
+      }
+      const [offset, length] = currentRange
+      return [from, offset + length - from + 1]
+    }
     const shift = (tokens, steps = 1) => tokens.splice(0, steps)
     const isSymbol = (tokens, expected = undefined) => {
       if (tokens.length === 0) {
@@ -267,20 +276,6 @@
     }
     const unexpected = (tokens) => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset(tokens)}`, offset(tokens))
 
-    const _recursiveExpression = (subExpression, operators) => {
-      const expectedSymbols = Object.keys(operators)
-      return (tokens) => {
-        let result = subExpression(tokens)
-        let symbol = shiftOnSymbols(tokens, expectedSymbols)
-        while (symbol) {
-          const sub = subExpression(tokens)
-          result = bind(operators[symbol], result, sub)
-          symbol = shiftOnSymbols(tokens, expectedSymbols)
-        }
-        return result
-      }
-    }
-
     const primaryExpression = (tokens) => {
       checkNotEndOfExpression(tokens)
       if (isSymbol(tokens, '(')) {
@@ -295,14 +290,15 @@
       if (isSymbol(tokens)) {
         unexpected(tokens)
       }
-      const [[type, value, ...range]] = shift(tokens)
+      const [[type, value, ...valueRange]] = shift(tokens)
       if (type === TOKEN_TYPE_IDENTIFIER) {
-        return bind(contextProperty, constant(range, value))
+        return propertyOfContext(range, constant(valueRange, value))
       }
-      return constant(range, value)
+      return constant(valueRange, value)
     }
 
     const CallOrMemberExpression = (tokens) => {
+      const from = offset(tokens)
       let result = primaryExpression(tokens)
       const operators = {
         '(': () => {
@@ -316,24 +312,27 @@
             }
             args.push(expression(tokens))
           }
+          const callRange = range(tokens, from)
           shift(tokens)
-          result = bind(call, result, args)
+          result = callFunction(callRange, result, args)
         },
         '[': () => {
           const name = expression(tokens)
           if (!isSymbol(tokens, ']')) {
             unexpected(tokens)
           }
+          const propertyRange = range(tokens, from)
           shift(tokens)
-          result = bind(property, result, name)
+          result = propertyOf(propertyRange, result, name)
         },
         '.': () => {
-          const [type, value, ...range] = current(tokens)
+          const [type, value, ...valueRange] = current(tokens)
           if (type !== TOKEN_TYPE_IDENTIFIER) {
             unexpected(tokens)
           }
+          const propertyRange = range(tokens, from)
           shift(tokens)
-          result = bind(property, result, constant(range, value))
+          result = propertyOf(propertyRange, result, constant(valueRange, value))
         }
       }
       while (isSymbol(tokens, '([.')) {
@@ -344,23 +343,39 @@
     }
 
     const unaryExpression = (tokens) => {
-      const [type, value] = current(tokens)
+      const [type, value, from] = current(tokens)
       const postProcess = isSymbol(tokens, '+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
       if (!postProcess) {
         return CallOrMemberExpression(tokens)
       }
+      const unaryRange = range(tokens, from)
       shift(tokens)
       let result = expression(tokens)
-      if (value === '+') {
-        result = bind(add, constant([], 0), result)
-      } else if (value === '-') {
-        result = bind(sub, constant([], 0), result)
+      // + is absorbed
+      if (value === '-') {
+        result = neg(unaryRange, result)
       } else if (value === '!') {
-        result = bind(not, result)
-      } else {
-        result = bind(getTypeof, result)
+        result = not(unaryRange, result)
+      } else if (value === 'typeof') {
+        result = getTypeof(unaryRange, result)
       }
       return result
+    }
+
+    const _recursiveExpression = (subExpression, operators) => {
+      const expectedSymbols = Object.keys(operators)
+      return (tokens) => {
+        const from = offset(tokens)
+        let result = subExpression(tokens)
+        let symbol = shiftOnSymbols(tokens, expectedSymbols)
+        while (symbol) {
+          const sub = subExpression(tokens)
+          const recursiveRange = range(sub, from)
+          result = operators[symbol](recursiveRange, result, sub)
+          symbol = shiftOnSymbols(tokens, expectedSymbols)
+        }
+        return result
+      }
     }
 
     const exponentiationExpression = _recursiveExpression(unaryExpression, {
@@ -401,6 +416,7 @@
     })
 
     const conditionalExpression = (tokens) => {
+      const from = offset(tokens)
       const condition = logicalORExpression(tokens)
       if (shiftOnSymbols(tokens, ['?'])) {
         const trueResult = conditionalExpression(tokens)
@@ -408,9 +424,10 @@
         if (!isSymbol(tokens, ':')) {
           unexpected(tokens)
         }
+        const conditionRange = range(tokens, from)
         shift(tokens)
         const falseResult = conditionalExpression(tokens)
-        return bind(ternary, condition, trueResult, falseResult)
+        return ternary(conditionRange, condition, trueResult, falseResult)
       }
       return condition
     }
