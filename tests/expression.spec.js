@@ -586,17 +586,13 @@ describe('expression', () => {
       },
       '+1': {
         json: {
-          add: [
-            { constant: [0] },
-            { constant: [1] }
-          ]
+          constant: [1]
         },
         expected: 1
       },
       '-1': {
         json: {
-          sub: [
-            { constant: [0] },
+          neg: [
             { constant: [1] }
           ]
         },
