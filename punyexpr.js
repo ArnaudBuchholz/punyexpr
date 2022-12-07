@@ -245,7 +245,7 @@
         currentRange = tokensOrOp.$[2]
       }
       const [offset, length] = currentRange
-      return [from, offset + length - from + 1]
+      return [from, offset + length - from]
     }
     const shift = (tokens, steps = 1) => tokens.splice(0, steps)
     const isSymbol = (tokens, expected = undefined) => {
@@ -458,16 +458,24 @@
     )
   }
 
-  const toJSON = expr => ({
-    [expr.$[0]]: expr.$[1].map(
-      // eslint-disable-next-line valid-typeof
-      arg => typeof arg === FUNCTION
-        ? toJSON(arg)
-        : Array.isArray(arg)
-          ? arg.map(toJSON)
-          : arg
-    )
-  })
+  const toJSON = expr => {
+    const [op, args, [at, length]] = expr.$
+    return {
+      op,
+      at,
+      length,
+      args: args.map(arg => {
+        // eslint-disable-next-line valid-typeof
+        if (typeof arg === FUNCTION) {
+          return toJSON(arg)
+        }
+        if (Array.isArray(arg)) {
+          return arg.map(toJSON)
+        }
+        return arg
+      })
+    }
+  }
 
   const punyexpr = str => {
     const impl = parse(tokenize(str))
