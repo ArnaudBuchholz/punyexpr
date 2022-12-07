@@ -58,71 +58,133 @@ describe('expression', () => {
     process({
       1: {
         json: {
-          constant: [1]
+          op: 'constant',
+          at: 0,
+          length: 1,
+          args: [1]
         },
         expected: 1
       },
       true: {
         json: {
-          constant: [true]
+          op: 'constant',
+          at: 0,
+          length: 4,
+          args: [true]
         },
         expected: true
       },
       '"a"': {
         json: {
-          constant: ['a']
+          op: 'constant',
+          at: 0,
+          length: 3,
+          args: ['a']
         },
         expected: 'a'
       },
       '\'a\'': {
         json: {
-          constant: ['a']
+          op: 'constant',
+          at: 0,
+          length: 3,
+          args: ['a']
         },
         expected: 'a'
       },
       '1 + 2': {
         json: {
-          add: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'add',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: 3
       },
       '1 + 2 + 3': {
         json: {
-          add: [
-            {
-              add: [
-                { constant: [1] },
-                { constant: [2] }
-              ]
-            },
-            { constant: [3] }
-          ]
+          op: 'add',
+          at: 0,
+          length: 9,
+          args: [{
+            op: 'add',
+            at: 0,
+            length: 5,
+            args: [{
+              op: 'constant',
+              at: 0,
+              length: 1,
+              args: [1]
+            }, {
+              op: 'constant',
+              at: 4,
+              length: 1,
+              args: [2]
+            }]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 1,
+            args: [3]
+          }]
         },
         expected: 6
       },
       '1 - 2': {
         json: {
-          sub: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'sub',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: -1
       },
       '1 + 2 - 3': {
         json: {
-          sub: [
-            {
-              add: [
-                { constant: [1] },
-                { constant: [2] }
-              ]
-            },
-            { constant: [3] }
-          ]
+          op: 'sub',
+          at: 0,
+          length: 9,
+          args: [{
+            op: 'add',
+            at: 0,
+            length: 5,
+            args: [{
+              op: 'constant',
+              at: 0,
+              length: 1,
+              args: [1]
+            }, {
+              op: 'constant',
+              at: 4,
+              length: 1,
+              args: [2]
+            }]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 1,
+            args: [3]
+          }]
         },
         expected: 0
       },
@@ -133,6 +195,8 @@ describe('expression', () => {
             { constant: [2] }
           ]
         },
+        only: true,
+        verbose: true,
         expected: '12'
       },
       '"1" - 2': {
