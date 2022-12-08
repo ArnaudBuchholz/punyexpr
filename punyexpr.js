@@ -76,7 +76,7 @@
       let offset = 0
       let lastTokenType
       const requireSeparator = [TOKEN_TYPE_LITERAL, TOKEN_TYPE_IDENTIFIER]
-      string.replace(TOKENIZER_REGEXP, (match, ...capturedValues) => {
+      string.replace(TOKENIZER_REGEXP, ({ length }, ...capturedValues) => {
         const rawType = capturedValues.findIndex(capturedValue => capturedValue !== undefined)
         const capturedValue = capturedValues[rawType]
         const converter = TOKENIZER_CONVERTER[rawType]
@@ -86,9 +86,9 @@
         }
         lastTokenType = type
         if (type !== undefined) {
-          tokens.push([type, value, offset, match.length])
+          tokens.push([type, value, offset, length])
         }
-        offset += capturedValue.length
+        offset += length
       })
       return tokens
     }
