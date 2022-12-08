@@ -190,551 +190,1138 @@ describe('expression', () => {
       },
       '"1" + 2': {
         json: {
-          add: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'add',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
-        only: true,
-        verbose: true,
         expected: '12'
       },
       '"1" - 2': {
         json: {
-          sub: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'sub',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: -1
       },
       '10 ** 2': {
         json: {
-          exp: [
-            { constant: [10] },
-            { constant: [2] }
+          op: 'exp',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 2,
+            args: [10]
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }
           ]
         },
         expected: 100
       },
       '2 * 3': {
         json: {
-          mul: [
-            { constant: [2] },
-            { constant: [3] }
-          ]
+          op: 'mul',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [3]
+          }]
         },
         expected: 6
       },
       '3 / 2': {
         json: {
-          div: [
-            { constant: [3] },
-            { constant: [2] }
-          ]
+          op: 'div',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [3]
+          },
+          {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: 1.5
       },
       '3 % 2': {
         json: {
-          remainder: [
-            { constant: [3] },
-            { constant: [2] }
+          op: 'remainder',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [3]
+          },
+          {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }
           ]
         },
         expected: 1
       },
       '2 < 2': {
         json: {
-          lt: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'lt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '1 < 2': {
         json: {
-          lt: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'lt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '2 < 1': {
         json: {
-          lt: [
-            { constant: [2] },
-            { constant: [1] }
-          ]
+          op: 'lt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: false
       },
       '2 <= 2': {
         json: {
-          lte: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'lte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '1 <= 2': {
         json: {
-          lte: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'lte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '2 <= 1': {
         json: {
-          lte: [
-            { constant: [2] },
-            { constant: [1] }
-          ]
+          op: 'lte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: false
       },
       '2 > 2': {
         json: {
-          gt: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'gt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '1 > 2': {
         json: {
-          gt: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'gt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '2 > 1': {
         json: {
-          gt: [
-            { constant: [2] },
-            { constant: [1] }
-          ]
+          op: 'gt',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: true
       },
       '2 >= 2': {
         json: {
-          gte: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'gte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '1 >= 2': {
         json: {
-          gte: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'gte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '2 >= 1': {
         json: {
-          gte: [
-            { constant: [2] },
-            { constant: [1] }
-          ]
+          op: 'gte',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: true
       },
       '1 == 2': {
         json: {
-          eq: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'eq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '"1" == 2': {
         json: {
-          eq: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'eq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '2 == 2': {
         json: {
-          eq: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'eq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          },
+          {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '"2" == 2': {
         json: {
-          eq: [
-            { constant: ['2'] },
-            { constant: [2] }
+          op: 'eq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['2']
+          },
+          {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }
           ]
         },
         expected: true
       },
       '1 != 2': {
         json: {
-          neq: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'neq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '"1" != 2': {
         json: {
-          neq: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'neq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '2 != 2': {
         json: {
-          neq: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'neq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '"2" != 2': {
         json: {
-          neq: [
-            { constant: ['2'] },
-            { constant: [2] }
-          ]
+          op: 'neq',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['2']
+          }, {
+            op: 'constant',
+            at: 5,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '1 === 2': {
         json: {
-          eqq: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'eqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '"1" === 2': {
         json: {
-          eqq: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'eqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '2 === 2': {
         json: {
-          eqq: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'eqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '"2" === 2': {
         json: {
-          eqq: [
-            { constant: ['2'] },
-            { constant: [2] }
-          ]
+          op: 'eqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['2']
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '1 !== 2': {
         json: {
-          neqq: [
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'neqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '"1" !== 2': {
         json: {
-          neqq: [
-            { constant: ['1'] },
-            { constant: [2] }
-          ]
+          op: 'neqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['1']
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       '2 !== 2': {
         json: {
-          neqq: [
-            { constant: [2] },
-            { constant: [2] }
-          ]
+          op: 'neqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 1,
+            args: [2]
+          }, {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: false
       },
       '"2" !== 2': {
         json: {
-          neqq: [
-            { constant: ['2'] },
-            { constant: [2] }
-          ]
+          op: 'neqq',
+          at: 0,
+          length: 7,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 3,
+            args: ['2']
+          },
+          {
+            op: 'constant',
+            at: 6,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: true
       },
       'false && false': {
         json: {
-          and: [
-            { constant: [false] },
-            { constant: [false] }
-          ]
+          op: 'and',
+          at: 0,
+          length: 14,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 9,
+            length: 5,
+            args: [false]
+          }]
         },
         expected: false
       },
       'true && false': {
         json: {
-          and: [
-            { constant: [true] },
-            { constant: [false] }
-          ]
+          op: 'and',
+          at: 0,
+          length: 13,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 5,
+            args: [false]
+          }]
         },
         expected: false
       },
       'false && true': {
         json: {
-          and: [
-            { constant: [false] },
-            { constant: [true] }
-          ]
+          op: 'and',
+          at: 0,
+          length: 13,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 9,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: false
       },
       'true && true': {
         json: {
-          and: [
-            { constant: [true] },
-            { constant: [true] }
-          ]
+          op: 'and',
+          at: 0,
+          length: 12,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: true
       },
       'false || false': {
         json: {
-          or: [
-            { constant: [false] },
-            { constant: [false] }
-          ]
+          op: 'or',
+          at: 0,
+          length: 14,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 9,
+            length: 5,
+            args: [false]
+          }]
         },
         expected: false
       },
       'true || false': {
         json: {
-          or: [
-            { constant: [true] },
-            { constant: [false] }
-          ]
+          op: 'or',
+          at: 0,
+          length: 13,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 5,
+            args: [false]
+          }]
         },
         expected: true
       },
       'false || true': {
         json: {
-          or: [
-            { constant: [false] },
-            { constant: [true] }
-          ]
+          op: 'or',
+          at: 0,
+          length: 13,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 9,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: true
       },
       'true || true': {
         json: {
-          or: [
-            { constant: [true] },
-            { constant: [true] }
-          ]
+          op: 'or',
+          at: 0,
+          length: 12,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: true
       },
       'true ? 1 : 2': {
         json: {
-          ternary: [
-            { constant: [true] },
-            { constant: [1] },
-            { constant: [2] }
-          ]
+          op: 'ternary',
+          at: 0,
+          length: 10,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 7,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 11,
+            length: 1,
+            args: [2]
+          }]
         },
         expected: 1
       },
       'false ? "a" : "b"': {
         json: {
-          ternary: [
-            { constant: [false] },
-            { constant: ['a'] },
-            { constant: ['b'] }
-          ]
+          op: 'ternary',
+          at: 0,
+          length: 11,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 3,
+            args: ['a']
+          }, {
+            op: 'constant',
+            at: 12,
+            length: 3,
+            args: ['b']
+          }]
         },
         expected: 'b'
       },
       '(1 + 2) * 3': {
         json: {
-          mul: [
-            {
-              add: [
-                { constant: [1] },
-                { constant: [2] }
-              ]
-            },
-            { constant: [3] }
-          ]
+          op: 'mul',
+          at: 0,
+          length: 11,
+          args: [{
+            op: 'add',
+            at: 1,
+            length: 5,
+            args: [{
+              op: 'constant',
+              at: 1,
+              length: 1,
+              args: [1]
+            }, {
+              op: 'constant',
+              at: 5,
+              length: 1,
+              args: [2]
+            }]
+          }, {
+            op: 'constant',
+            at: 10,
+            length: 1,
+            args: [3]
+          }]
         },
         expected: 9
       },
       '1 + (2 * 3)': {
         json: {
-          add: [
-            { constant: [1] },
+          op: 'add',
+          at: 0,
+          length: 10,
+          args: [
             {
-              mul: [
-                { constant: [2] },
-                { constant: [3] }
-              ]
-            }
-          ]
+              op: 'constant',
+              at: 0,
+              length: 1,
+              args: [1]
+            },
+            {
+              op: 'mul',
+              at: 5,
+              length: 5,
+              args: [{
+                op: 'constant',
+                at: 5,
+                length: 1,
+                args: [2]
+              }, {
+                op: 'constant',
+                at: 9,
+                length: 1,
+                args: [3]
+              }]
+            }]
         },
         expected: 7
       },
       'typeof 1': {
         json: {
-          getTypeof: [
-            { constant: [1] }
-          ]
+          op: 'getTypeof',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 7,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: 'number'
       },
       'typeof "abc"': {
         json: {
-          getTypeof: [
-            { constant: ['abc'] }
-          ]
+          op: 'getTypeof',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 7,
+            length: 5,
+            args: ['abc']
+          }]
         },
         expected: 'string'
       },
       'typeof true': {
         json: {
-          getTypeof: [
-            { constant: [true] }
-          ]
+          op: 'getTypeof',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 7,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: 'boolean'
       },
       'typeof null': {
         json: {
-          getTypeof: [
-            { constant: [null] }
-          ]
+          op: 'getTypeof',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 7,
+            length: 4,
+            args: [null]
+          }]
         },
         expected: 'object'
       },
       '+1': {
         json: {
-          constant: [1]
+          op: 'constant',
+          at: 1,
+          length: 1,
+          args: [1]
         },
         expected: 1
       },
       '-1': {
         json: {
-          neg: [
-            { constant: [1] }
-          ]
+          op: 'neg',
+          at: 0,
+          length: 1,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: -1
       },
       '!true': {
         json: {
-          not: [
-            { constant: [true] }
-          ]
+          op: 'not',
+          at: 0,
+          length: 1,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 4,
+            args: [true]
+          }]
         },
         expected: false
       },
       '!false': {
         json: {
-          not: [
-            { constant: [false] }
+          op: 'not',
+          at: 0,
+          length: 1,
+          args: [
+            {
+              op: 'constant',
+              at: 1,
+              length: 5,
+              args: [
+                false
+              ]
+            }
           ]
         },
         expected: true
       },
       '!!""': {
         json: {
-          not: [
-            {
-              not: [
-                { constant: [''] }
-              ]
-            }
-          ]
+          op: 'not',
+          at: 0,
+          length: 1,
+          args: [{
+            op: 'not',
+            at: 1,
+            length: 1,
+            args: [{
+              op: 'constant',
+              at: 2,
+              length: 2,
+              args: ['']
+            }]
+          }]
         },
         expected: false
       },
       '"typeof"': {
-        json: { constant: ['typeof'] },
+        json: {
+          op: 'constant',
+          at: 0,
+          length: 8,
+          args: ['typeof']
+        },
         expected: 'typeof'
       },
       '(2).toFixed(2)': {
         json: {
-          call: [
+          op: 'call',
+          at: 0,
+          length: 14,
+          args: [{
+            op: 'property',
+            at: 0,
+            length: 11,
+            args: [{
+              op: 'constant',
+              at: 1,
+              length: 1,
+              args: [2]
+            }, {
+              op: 'constant',
+              at: 4,
+              length: 7,
+              args: ['toFixed']
+            }]
+          }, [
             {
-              property: [
-                { constant: [2] },
-                { constant: ['toFixed'] }
-              ]
-            },
-            [
-              { constant: [2] }
-            ]
-          ]
+              op: 'constant',
+              at: 12,
+              length: 1,
+              args: [2]
+            }
+          ]]
         },
         expected: '2.00'
       },
       '(2).toFixed(2).endsWith("00")': {
         json: {
-          call: [
-            {
-              property: [
+          op: 'call',
+          at: 0,
+          length: 27,
+          args: [{
+            op: 'property',
+            at: 0,
+            length: 23,
+            args: [{
+              op: 'call',
+              at: 0,
+              length: 14,
+              args: [{
+                op: 'property',
+                at: 0,
+                length: 11,
+                args: [{
+                  op: 'constant',
+                  at: 1,
+                  length: 1,
+                  args: [2]
+                }, {
+                  op: 'constant',
+                  at: 4,
+                  length: 7,
+                  args: ['toFixed']
+                }]
+              }, [
                 {
-                  call: [
-                    {
-                      property: [
-                        { constant: [2] },
-                        { constant: ['toFixed'] }
-                      ]
-                    },
-                    [
-                      { constant: [2] }
-                    ]
-                  ]
-                },
-                { constant: ['endsWith'] }
-              ]
-            },
-            [
-              { constant: ['00'] }
-            ]
-          ]
+                  op: 'constant',
+                  at: 12,
+                  length: 1,
+                  args: [2]
+                }
+              ]]
+            }, {
+              op: 'constant',
+              at: 15,
+              length: 8,
+              args: ['endsWith']
+            }]
+          }, [
+            {
+              op: 'constant',
+              at: 24,
+              length: 4,
+              args: ['00']
+            }
+          ]]
         },
         expected: true
       }
@@ -745,94 +1332,171 @@ describe('expression', () => {
     process({
       hello: {
         json: {
-          context: [
-            { constant: ['hello'] }
-          ]
+          op: 'context',
+          at: 0,
+          length: 5,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: ['hello']
+          }]
         },
         expected: 'World !'
       },
       'object.property1': {
         json: {
-          property: [
-            {
-              context: [
-                { constant: ['object'] }
-              ]
-            },
-            { constant: ['property1'] }
-          ]
+          op: 'property',
+          at: 0,
+          length: 16,
+          args: [{
+            op: 'context',
+            at: 0,
+            length: 6,
+            args: [{
+              op: 'constant',
+              at: 0,
+              length: 6,
+              args: ['object']
+            }]
+          }, {
+            op: 'constant',
+            at: 7,
+            length: 9,
+            args: ['property1']
+          }]
         },
         expected: 1
       },
       'object["property1"]': {
         json: {
-          property: [
-            {
-              context: [
-                { constant: ['object'] }
-              ]
-            },
-            { constant: ['property1'] }
-          ]
+          op: 'property',
+          at: 0,
+          length: 17,
+          args: [{
+            op: 'context',
+            at: 0,
+            length: 6,
+            args: [{
+              op: 'constant',
+              at: 0,
+              length: 6,
+              args: ['object']
+            }]
+          }, {
+            op: 'constant',
+            at: 7,
+            length: 11,
+            args: ['property1']
+          }]
         },
         expected: 1
       },
       'object.method()': {
         json: {
-          call: [
-            {
-              property: [
-                {
-                  context: [
-                    { constant: ['object'] }
-                  ]
-                },
-                { constant: ['method'] }
-              ]
-            },
-            []
-          ]
+          op: 'call',
+          at: 0,
+          length: 15,
+          args: [{
+            op: 'property',
+            at: 0,
+            length: 13,
+            args: [{
+              op: 'context',
+              at: 0,
+              length: 6,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 6,
+                args: ['object']
+              }]
+            }, {
+              op: 'constant',
+              at: 7,
+              length: 6,
+              args: ['method']
+            }]
+          }, [
+          ]]
         },
         expected: 'OK'
       },
       'object.method(1)': {
         json: {
-          call: [
+          op: 'call',
+          at: 0,
+          length: 16,
+          args: [{
+            op: 'property',
+            at: 0,
+            length: 13,
+            args: [{
+              op: 'context',
+              at: 0,
+              length: 6,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 6,
+                args: ['object']
+              }]
+            }, {
+              op: 'constant',
+              at: 7,
+              length: 6,
+              args: ['method']
+            }]
+          }, [
             {
-              property: [
-                {
-                  context: [
-                    { constant: ['object'] }
-                  ]
-                },
-                { constant: ['method'] }
-              ]
-            },
-            [
-              { constant: [1] }
-            ]
-          ]
+              op: 'constant',
+              at: 14,
+              length: 1,
+              args: [1]
+            }
+          ]]
         },
         expected: 'OK1'
       },
       'object.method(1,2)': {
         json: {
-          call: [
+          op: 'call',
+          at: 0,
+          length: 18,
+          args: [{
+            op: 'property',
+            at: 0,
+            length: 13,
+            args: [{
+              op: 'context',
+              at: 0,
+              length: 6,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 6,
+                args: ['object']
+              }]
+            }, {
+              op: 'constant',
+              at: 7,
+              length: 6,
+              args: ['method']
+            }]
+          }, [
             {
-              property: [
-                {
-                  context: [
-                    { constant: ['object'] }
-                  ]
-                },
-                { constant: ['method'] }
-              ]
+              op: 'constant',
+              at: 14,
+              length: 1,
+              args: [1]
             },
-            [
-              { constant: [1] },
-              { constant: [2] }
-            ]
-          ]
+            {
+              op: 'constant',
+              at: 16,
+              length: 1,
+              args: [2]
+            }
+          ]]
         },
         expected: 'OK1,2'
       }
