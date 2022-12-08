@@ -292,7 +292,7 @@
       }
       const [[type, value, ...valueRange]] = shift(tokens)
       if (type === TOKEN_TYPE_IDENTIFIER) {
-        return propertyOfContext(range, constant(valueRange, value))
+        return propertyOfContext(valueRange, constant(valueRange, value))
       }
       return constant(valueRange, value)
     }
