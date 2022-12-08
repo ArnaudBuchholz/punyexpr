@@ -8,7 +8,7 @@ describe('expression', () => {
 
   const process = (tests, context) => {
     Object.keys(tests).forEach(expression => {
-      const { json, expected, only, verbose, debug } = tests[expression]
+      const { tokens, json, expected, only, verbose, debug } = tests[expression]
       let label
       if (expected instanceof Error) {
         label = expected.name
@@ -26,6 +26,9 @@ describe('expression', () => {
           debugger // eslint-disable-line no-debugger
         }
         let exceptionCaught
+        if (tokens) {
+          expect(punyexpr.tokenize(expression)).toStrictEqual(tokens)
+        }
         let expr
         try {
           expr = punyexpr(expression)
@@ -192,7 +195,7 @@ describe('expression', () => {
         json: {
           op: 'add',
           at: 0,
-          length: 5,
+          length: 7,
           args: [{
             op: 'constant',
             at: 0,
@@ -200,7 +203,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 4,
+            at: 6,
             length: 1,
             args: [2]
           }]
@@ -211,7 +214,7 @@ describe('expression', () => {
         json: {
           op: 'sub',
           at: 0,
-          length: 5,
+          length: 7,
           args: [{
             op: 'constant',
             at: 0,
@@ -219,7 +222,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 4,
+            at: 6,
             length: 1,
             args: [2]
           }]
@@ -557,7 +560,7 @@ describe('expression', () => {
         json: {
           op: 'eq',
           at: 0,
-          length: 6,
+          length: 8,
           args: [{
             op: 'constant',
             at: 0,
@@ -565,7 +568,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 5,
+            at: 7,
             length: 1,
             args: [2]
           }]
@@ -596,7 +599,7 @@ describe('expression', () => {
         json: {
           op: 'eq',
           at: 0,
-          length: 6,
+          length: 8,
           args: [{
             op: 'constant',
             at: 0,
@@ -605,7 +608,7 @@ describe('expression', () => {
           },
           {
             op: 'constant',
-            at: 5,
+            at: 7,
             length: 1,
             args: [2]
           }
@@ -636,7 +639,7 @@ describe('expression', () => {
         json: {
           op: 'neq',
           at: 0,
-          length: 6,
+          length: 8,
           args: [{
             op: 'constant',
             at: 0,
@@ -644,7 +647,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 5,
+            at: 7,
             length: 1,
             args: [2]
           }]
@@ -674,7 +677,7 @@ describe('expression', () => {
         json: {
           op: 'neq',
           at: 0,
-          length: 6,
+          length: 8,
           args: [{
             op: 'constant',
             at: 0,
@@ -682,7 +685,7 @@ describe('expression', () => {
             args: ['2']
           }, {
             op: 'constant',
-            at: 5,
+            at: 7,
             length: 1,
             args: [2]
           }]
@@ -712,7 +715,7 @@ describe('expression', () => {
         json: {
           op: 'eqq',
           at: 0,
-          length: 7,
+          length: 9,
           args: [{
             op: 'constant',
             at: 0,
@@ -720,7 +723,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 6,
+            at: 8,
             length: 1,
             args: [2]
           }]
@@ -750,7 +753,7 @@ describe('expression', () => {
         json: {
           op: 'eqq',
           at: 0,
-          length: 7,
+          length: 9,
           args: [{
             op: 'constant',
             at: 0,
@@ -758,7 +761,7 @@ describe('expression', () => {
             args: ['2']
           }, {
             op: 'constant',
-            at: 6,
+            at: 8,
             length: 1,
             args: [2]
           }]
@@ -788,7 +791,7 @@ describe('expression', () => {
         json: {
           op: 'neqq',
           at: 0,
-          length: 7,
+          length: 9,
           args: [{
             op: 'constant',
             at: 0,
@@ -796,7 +799,7 @@ describe('expression', () => {
             args: ['1']
           }, {
             op: 'constant',
-            at: 6,
+            at: 8,
             length: 1,
             args: [2]
           }]
@@ -826,7 +829,7 @@ describe('expression', () => {
         json: {
           op: 'neqq',
           at: 0,
-          length: 7,
+          length: 9,
           args: [{
             op: 'constant',
             at: 0,
@@ -835,7 +838,7 @@ describe('expression', () => {
           },
           {
             op: 'constant',
-            at: 6,
+            at: 8,
             length: 1,
             args: [2]
           }]
@@ -1022,7 +1025,7 @@ describe('expression', () => {
         json: {
           op: 'ternary',
           at: 0,
-          length: 11,
+          length: 13,
           args: [{
             op: 'constant',
             at: 0,
@@ -1035,7 +1038,7 @@ describe('expression', () => {
             args: ['a']
           }, {
             op: 'constant',
-            at: 12,
+            at: 14,
             length: 3,
             args: ['b']
           }]
@@ -1276,7 +1279,7 @@ describe('expression', () => {
         json: {
           op: 'call',
           at: 0,
-          length: 27,
+          length: 29,
           args: [{
             op: 'property',
             at: 0,
@@ -1324,6 +1327,50 @@ describe('expression', () => {
           ]]
         },
         expected: true
+      },
+      '"".split().length': {
+        tokens: [
+          ['literal', '', 0, 2],
+          ['symbol', '.', 2, 1],
+          ['identifier', 'split', 3, 5],
+          ['symbol', '(', 8, 1],
+          ['symbol', ')', 9, 1],
+          ['symbol', '.', 10, 1],
+          ['identifier', 'length', 11, 6]
+        ],
+        json: {
+          op: 'property',
+          at: 0,
+          length: 17,
+          args: [{
+            op: 'call',
+            at: 0,
+            length: 10,
+            args: [{
+              op: 'property',
+              at: 0,
+              length: 8,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 2,
+                args: ['']
+              }, {
+                op: 'constant',
+                at: 3,
+                length: 5,
+                args: ['split']
+              }]
+            }, [
+            ]]
+          }, {
+            op: 'constant',
+            at: 11,
+            length: 6,
+            args: ['length']
+          }]
+        },
+        expected: 1
       }
     })
   })
@@ -1372,7 +1419,7 @@ describe('expression', () => {
         json: {
           op: 'property',
           at: 0,
-          length: 17,
+          length: 19,
           args: [{
             op: 'context',
             at: 0,
