@@ -14,6 +14,10 @@ div.tf-tree {
   font-size: 14px;
 }
 
+.ast .tf-nc {
+  cursor: pointer;
+}
+
 .ast .op > span {
   font-weight: bold;
 }
