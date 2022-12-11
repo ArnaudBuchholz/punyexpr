@@ -1,9 +1,44 @@
-button {
-  margin: 0 1rem 0 1rem;
+:root {
+  --border: #787878;
 }
 
-span.output {
-  font-weight: bold;
+body {
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: black;
+  color: white
+}
+
+.input {
+  border: 1px dashed var(--border);
+  padding: 1rem;
+  white-space: pre;
+}
+
+.input:empty {
+  font-style: italic;
+}
+
+.input:empty::before {
+  content: 'Type your expression here';
+  color: var(--border);
+}
+
+.output {
+  margin-top: 1rem;
+  border: 1px dashed var(--border);
+  padding: 1rem;
+  white-space: pre;
+}
+
+.output.error {
+  color: red;
+}
+
+.credit {
+  color: var(--border);
+  font-size: 12px;
+  font-style: italic;
 }
 
 div.tf-tree {
@@ -14,7 +49,20 @@ div.tf-tree {
   font-size: 14px;
 }
 
+.ast .tf-nc:before,
+.ast .tf-nc:after {
+  border-left-color: var(--border);
+  border-left-width: 2px;
+}
+
+.ast li li:before {
+  border-top-color: var(--border);
+  border-top-width: 2px;
+}
+
 .ast .tf-nc {
+  border-color: var(--border);
+  border-top-width: 2px;
   cursor: pointer;
 }
 
@@ -24,4 +72,24 @@ div.tf-tree {
 
 .ast .constant > span {
   border-radius: 50%;
+}
+
+.string {
+  color: #ce9178;
+}
+
+.number {
+  color: #b5cea8;
+}
+
+.boolean {
+  color: #569cd6;
+}
+
+.object {
+  color: #569cd6;
+}
+
+.function {
+  color: #dcdcaa;
 }
