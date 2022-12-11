@@ -57,11 +57,9 @@ window.addEventListener('load', () => {
     treeRoot.innerHTML = ''
     try {
       const expr = punyexpr(input.innerText)
-      // https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
-      const sel = window.getSelection()
-      console.log(sel)
-      // input.innerHTML = `<span>${input.innerText}</span>`
-      const result = expr()
+      const result = expr({
+        Math
+      })
       const typeOfResult = typeof result
       if (typeOfResult === 'function') {
         output.appendChild(document.createTextNode(result.toString()))
