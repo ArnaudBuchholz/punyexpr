@@ -15,14 +15,13 @@ child-src 'none';
     <link rel="stylesheet" href="calc.css">
   </head>
   <body>
-    <input type="text"><button id="punyexpr">&#9193;</button>
-    <span class="output"></span>
+    <div class="input" contenteditable></div>
     <div class="credit">
-      <ul>
-        <li>Expression compiler and evaluator : <a href="https://www.npmjs.com/package/punyexpr" target="_blank" rel="noopener noreferrer">punyexpr</a></li>
-        <li>Tree visualization based on <a href="https://dumptyd.github.io/treeflex/" target="_blank" rel="noopener noreferrer">treeflex</a></li>
-      </ul>
+      <span>Expression compiler and evaluator : <a href="https://www.npmjs.com/package/punyexpr" target="_blank" rel="noopener noreferrer">punyexpr</a></span>
+      /
+      <span>Tree visualization based on <a href="https://dumptyd.github.io/treeflex/" target="_blank" rel="noopener noreferrer">treeflex</a></span>
     </div>
+    <div class="output"></div>
     <div class="tf-tree ast">
       <ul></ul>
     </div>
