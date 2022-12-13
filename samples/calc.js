@@ -1,6 +1,11 @@
 /* global location */
 
 window.addEventListener('load', () => {
+  [].slice.call(document.querySelectorAll('a')).forEach(a => {
+    a.setAttribute('target', '_blank')
+    a.setAttribute('rel', 'noopener noreferrer')
+  })
+
   const input = document.querySelector('.input')
   const output = document.querySelector('.output')
   const treeRoot = document.querySelector('.tf-tree ul')
