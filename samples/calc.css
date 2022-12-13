@@ -2,6 +2,10 @@
   --border: #787878;
 }
 
+a, a:visited {
+  color: var(--border);
+}
+
 body {
   font-size: 18px;
   font-family: Arial, Helvetica, sans-serif;
