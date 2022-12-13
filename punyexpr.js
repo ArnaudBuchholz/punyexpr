@@ -189,7 +189,7 @@
 
     const constant = buildOp('constant', value => value)
     const array = buildOp('array', (...itemsAndContext) => {
-      const context = itemsAndContext.at(-1)
+      const context = itemsAndContext[itemsAndContext.length - 1]
       return itemsAndContext.slice(0, -1).map(item => item(context))
     })
     const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
