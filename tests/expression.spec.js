@@ -37,13 +37,13 @@ describe('expression', () => {
         }
         if (expected instanceof Error) {
           expect(exceptionCaught).not.toBeUndefined()
-          expect(exceptionCaught.name).toBe(expected.name)
-          expect(exceptionCaught.message).toBe(expected.message)
-          expect(exceptionCaught.offset).toBe(expected.offset)
+          expect(exceptionCaught.name).toStrictEqual(expected.name)
+          expect(exceptionCaught.message).toStrictEqual(expected.message)
+          expect(exceptionCaught.offset).toStrictEqual(expected.offset)
         } else if (exceptionCaught) {
           throw exceptionCaught
         } else {
-          expect(expr.toString()).toBe(expression)
+          expect(expr.toString()).toStrictEqual(expression)
           const exprAsJson = expr.toJSON()
           if (verbose) {
             console.log(JSON.stringify(exprAsJson, undefined, 2))
@@ -51,7 +51,7 @@ describe('expression', () => {
           if (json) {
             expect(exprAsJson).toStrictEqual(json)
           }
-          expect(expr(context)).toBe(expected)
+          expect(expr(context)).toStrictEqual(expected)
         }
       })
     })
@@ -997,54 +997,6 @@ describe('expression', () => {
         },
         expected: true
       },
-      'true ? 1 : 2': {
-        json: {
-          op: 'ternary',
-          at: 0,
-          length: 10,
-          args: [{
-            op: 'constant',
-            at: 0,
-            length: 4,
-            args: [true]
-          }, {
-            op: 'constant',
-            at: 7,
-            length: 1,
-            args: [1]
-          }, {
-            op: 'constant',
-            at: 11,
-            length: 1,
-            args: [2]
-          }]
-        },
-        expected: 1
-      },
-      'false ? "a" : "b"': {
-        json: {
-          op: 'ternary',
-          at: 0,
-          length: 13,
-          args: [{
-            op: 'constant',
-            at: 0,
-            length: 5,
-            args: [false]
-          }, {
-            op: 'constant',
-            at: 8,
-            length: 3,
-            args: ['a']
-          }, {
-            op: 'constant',
-            at: 14,
-            length: 3,
-            args: ['b']
-          }]
-        },
-        expected: 'b'
-      },
       '(1 + 2) * 3': {
         json: {
           op: 'mul',
@@ -1375,6 +1327,149 @@ describe('expression', () => {
     })
   })
 
+  describe('ternary', () => {
+    process({
+      'true ? 1 : 2': {
+        json: {
+          op: 'ternary',
+          at: 0,
+          length: 12,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 4,
+            args: [true]
+          }, {
+            op: 'constant',
+            at: 7,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 11,
+            length: 1,
+            args: [2]
+          }]
+        },
+        expected: 1
+      },
+      'false ? "a" : "b"': {
+        json: {
+          op: 'ternary',
+          at: 0,
+          length: 17,
+          args: [{
+            op: 'constant',
+            at: 0,
+            length: 5,
+            args: [false]
+          }, {
+            op: 'constant',
+            at: 8,
+            length: 3,
+            args: ['a']
+          }, {
+            op: 'constant',
+            at: 14,
+            length: 3,
+            args: ['b']
+          }]
+        },
+        expected: 'b'
+      }
+    })
+  })
+
+  describe('array', () => {
+    process({
+      '[]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 2,
+          args: []
+        },
+        expected: []
+      },
+      '[1]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 3,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }]
+        },
+        expected: [1]
+      },
+      '[1,]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 4,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }]
+        },
+        expected: [1]
+      },
+      '[1, 2]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 6,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'constant',
+            at: 4,
+            length: 1,
+            args: [2]
+          }]
+        },
+        expected: [1, 2]
+      },
+      '[1, [2, 3]]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 11,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'array',
+            at: 4,
+            length: 6,
+            args: [{
+              op: 'constant',
+              at: 5,
+              length: 1,
+              args: [2]
+            }, {
+              op: 'constant',
+              at: 8,
+              length: 1,
+              args: [3]
+            }]
+          }]
+        },
+        expected: [1, [2, 3]]
+      }
+    })
+  })
+
   describe('contextual', () => {
     process({
       hello: {
@@ -1390,6 +1485,33 @@ describe('expression', () => {
           }]
         },
         expected: 'World !'
+      },
+      '[1, hello]': {
+        json: {
+          op: 'array',
+          at: 0,
+          length: 10,
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }, {
+            op: 'context',
+            at: 4,
+            length: 5,
+            args: [{
+              op: 'constant',
+              at: 4,
+              length: 5,
+              args: [
+                'hello'
+              ]
+            }
+            ]
+          }]
+        },
+        expected: [1, 'World !']
       },
       'object.property1': {
         json: {
@@ -1573,7 +1695,9 @@ describe('expression', () => {
       'a.+': error('UnexpectedTokenError', 'Unexpected token @2', 2),
       'a[1)': error('UnexpectedTokenError', 'Unexpected token @3', 3),
       'a(1]': error('UnexpectedTokenError', 'Unexpected token @3', 3),
-      '1 | "|"': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2)
+      '1 | "|"': error('UnexpectedRemainderError', 'Unexpected left over tokens @2', 2),
+      '[': error('EndOfExpressionError', 'Unexpected end of expression'),
+      '[,': error('UnexpectedTokenError', 'Unexpected token @1', 1)
     })
   })
 })
