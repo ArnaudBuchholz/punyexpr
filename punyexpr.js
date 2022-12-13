@@ -105,14 +105,14 @@
   PrimaryExpression :
     Identifier
     Literal
-    ⛔ArrayLiteral
+    [ ⟮Expression ⟮, Expression ⟯*⟯? ]
     ⛔ObjectLiteral
     ( Expression )
 
   CallOrMemberExpression : 💬 Supports this call thanks to binding
     PrimaryExpression
     CallOrMemberExpression ( )
-    CallOrMemberExpression ( Expression ⟮, Expression )
+    CallOrMemberExpression ( Expression ⟮, Expression ⟯* )
     CallOrMemberExpression [ Expression ] 💬 If result is a function, it is bound to the left part
     CallOrMemberExpression . Identifier 💬 If result is a function, it is bound to the left part
 
@@ -188,6 +188,10 @@
     const buildOp = (name, impl) => (range, ...args) => Object.assign(impl.bind(null, ...args), { $: [name, args, range] })
 
     const constant = buildOp('constant', value => value)
+    const array = buildOp('array', (...itemsAndContext) => {
+      const context = itemsAndContext.at(-1)
+      return itemsAndContext.slice(0, -1).map(item => item(context))
+    })
     const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
     const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
@@ -276,6 +280,22 @@
     }
     const unexpected = (tokens) => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset(tokens)}`, offset(tokens))
 
+    const arrayLiteral = (tokens) => {
+      const from = offset(tokens)
+      shift(tokens)
+      const items = []
+      while (!isSymbol(tokens, ']')) {
+        const item = expression(tokens)
+        items.push(item)
+        if (isSymbol(tokens, ',')) { // accepts trailing comma
+          shift(tokens)
+        }
+      }
+      const arrayRange = range(tokens, from)
+      shift(tokens)
+      return array(arrayRange, ...items)
+    }
+
     const primaryExpression = (tokens) => {
       checkNotEndOfExpression(tokens)
       if (isSymbol(tokens, '(')) {
@@ -286,6 +306,9 @@
         }
         shift(tokens)
         return result
+      }
+      if (isSymbol(tokens, '[')) {
+        return arrayLiteral(tokens)
       }
       if (isSymbol(tokens)) {
         unexpected(tokens)
@@ -424,9 +447,9 @@
         if (!isSymbol(tokens, ':')) {
           unexpected(tokens)
         }
-        const conditionRange = range(tokens, from)
         shift(tokens)
         const falseResult = conditionalExpression(tokens)
+        const conditionRange = range(falseResult, from)
         return ternary(conditionRange, condition, trueResult, falseResult)
       }
       return condition
