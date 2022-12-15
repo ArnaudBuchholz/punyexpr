@@ -1,6 +1,6 @@
 {
   "name": "punyexpr",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A minimalist expression compiler and evaluator",
   "main": "dist/punyexpr.js",
   "files": [
