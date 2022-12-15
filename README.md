@@ -47,9 +47,15 @@ const safebind = punybind.use({
 
 ## Implementation notes
 
+* Regular expressions are [not secure](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS), leverage the option `{ regex: true }` to enable them :
+
+```javascript
+const unsecure = punyexpr('value.match(/a+b/)', { regex: true })
+```
+
 * See the [source](https://github.com/ArnaudBuchholz/punyexpr/blob/master/punyexpr.js) for the (altered and) implemented grammar,<br> in particular the following are not supported :
   * Bitwise, async and coalesce operations
   * `new` and `this`
-  * Object and regular expression literals
+  * Object literals
 * See the [tests](https://github.com/ArnaudBuchholz/punyexpr/blob/master/tests/expression.spec.js) for supported expressions.
 * The implementation is **compliant** with [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
