@@ -3,6 +3,7 @@
 
   const TOKEN_TYPE_LITERAL = 'literal'
   const TOKEN_TYPE_IDENTIFIER = 'identifier'
+  const TOKEN_TYPE_REGEX = 'regex'
   const TOKEN_TYPE_SYMBOL = 'symbol'
   const FUNCTION = 'function'
 
@@ -27,6 +28,8 @@
 
     const TOKEN_REGEXP_IDENTIFIER = /([a-zA-Z_][a-zA-Z_0-9]*)/
 
+    const TOKEN_REGEXP_REGEX = /(\/(?:[^/\\]|\\.)+\/[gmiysd]*)/
+
     const TOKEN_REGEXP_SYMBOL = /(\+|-|\*|\/|\[|\]|\.|\?|:|%|<|=|>|!|&|\||\(|\)|,)/
 
     const TOKEN_REGEXP_SEPARATOR = /(\s)/
@@ -38,6 +41,7 @@
       TOKEN_REGEXP_DOUBLE_QUOTE_STRING,
       TOKEN_REGEXP_NUMBER,
       TOKEN_REGEXP_IDENTIFIER,
+      TOKEN_REGEXP_REGEX,
       TOKEN_REGEXP_SYMBOL,
 
       TOKEN_REGEXP_SEPARATOR,
@@ -65,6 +69,12 @@
           invalidTokenError(offset)
         }
         return [TOKEN_TYPE_IDENTIFIER, value]
+      },
+      value => {
+        const endPos = value.lastIndexOf('/')
+        const source = value.substring(1, endPos)
+        const options = value.substring(endPos + 1)
+        return [TOKEN_TYPE_REGEX, [source, options]]
       },
       value => [TOKEN_TYPE_SYMBOL, value],
       value => [],
@@ -500,8 +510,11 @@
     }
   }
 
-  const punyexpr = str => {
-    const impl = parse(tokenize(str))
+  const punyexpr = (str, options = {}) => {
+    const impl = parse(tokenize(str), {
+      regex: false,
+      ...options
+    })
     const expr = (context = {}) => impl(context)
     assignROProperties(expr, {
       toJSON: toJSON.bind(null, impl),
