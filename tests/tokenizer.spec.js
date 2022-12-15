@@ -54,6 +54,12 @@ describe('tokenizer', () => {
 
       typeof: [['identifier', 'typeof', 0, 6]],
 
+      '/ab+c/': [['regex', ['ab+c', ''], 0, 6]],
+      '/ab+c/ig': [['regex', ['ab+c', 'ig'], 0, 8]],
+      '/\\d+/': [['regex', ['\\d+', ''], 0, 5]],
+      '/a\\*b/g': [['regex', ['a\\*b', 'g'], 0, 7]],
+      '/http:\\/\\/server/': [['regex', ['http:\\/\\/server', ''], 0, 17]],
+
       ...'+-*/[].?:%<=>!&|(),'.split('').reduce((dict, symbol) => {
         dict[symbol] = [['symbol', symbol, 0, 1]]
         return dict
