@@ -6,7 +6,7 @@ describe('expression', () => {
     expect(typeof expr).toBe('function')
   })
 
-  const process = (tests, context) => {
+  const process = (tests, context, options) => {
     Object.keys(tests).forEach(expression => {
       const { tokens, json, expected, only, verbose, debug } = tests[expression]
       let label
@@ -31,7 +31,7 @@ describe('expression', () => {
         }
         let expr
         try {
-          expr = punyexpr(expression)
+          expr = punyexpr(expression, options)
         } catch (error) {
           exceptionCaught = error
         }
@@ -1468,6 +1468,25 @@ describe('expression', () => {
         expected: [1, [2, 3]]
       }
     })
+  })
+
+  describe('regex', () => {
+    describe('when not allowed', () => {
+      it('forbids usage of regular expressions by default', () => {
+        expect(() => punyexpr('/abc/')).toThrowError()
+      })
+
+    })
+
+    // describe('when allowed', () => {
+    //   process({
+    //     '/abc/': {
+    //       expected: /abc/
+    //     }
+    //   }, {}, {
+    //     regex: true
+    //   })
+    // })
   })
 
   describe('contextual', () => {
