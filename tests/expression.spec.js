@@ -1475,18 +1475,26 @@ describe('expression', () => {
       it('forbids usage of regular expressions by default', () => {
         expect(() => punyexpr('/abc/')).toThrowError()
       })
-
     })
 
-    // describe('when allowed', () => {
-    //   process({
-    //     '/abc/': {
-    //       expected: /abc/
-    //     }
-    //   }, {}, {
-    //     regex: true
-    //   })
-    // })
+    describe('when allowed', () => {
+      process({
+        '/abc/': {
+          expected: /abc/,
+          json: {
+            op: 'regex',
+            at: 0,
+            length: 5,
+            args: [
+              'abc',
+              ''
+            ]
+          }
+        }
+      }, {}, {
+        regex: true
+      })
+    })
   })
 
   describe('contextual', () => {
