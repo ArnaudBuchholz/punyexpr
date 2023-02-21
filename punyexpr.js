@@ -73,8 +73,8 @@
       value => {
         const endPos = value.lastIndexOf('/')
         const source = value.substring(1, endPos)
-        const options = value.substring(endPos + 1)
-        return [TOKEN_TYPE_REGEX, [source, options]]
+        const flags = value.substring(endPos + 1)
+        return [TOKEN_TYPE_REGEX, [source, flags]]
       },
       value => [TOKEN_TYPE_SYMBOL, value],
       value => [],
@@ -117,6 +117,7 @@
     Literal
     [ ⟮Expression ⟮, Expression ⟯*⟯? ]
     ⛔ObjectLiteral
+    RegularExpressionLiteral
     ( Expression )
 
   CallOrMemberExpression : 💬 Supports this call thanks to binding
@@ -202,6 +203,7 @@
       const context = itemsAndContext[itemsAndContext.length - 1]
       return itemsAndContext.slice(0, -1).map(item => item(context))
     })
+    const regex = buildOp('regex', (source, flags) => new RegExp(source, flags))
     const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
     const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
@@ -241,35 +243,38 @@
       return falseValue(context)
     })
 
-    const checkNotEndOfExpression = (tokens) => {
+    let tokens
+    let options
+
+    const checkNotEndOfExpression = () => {
       if (tokens.length === 0) {
         PunyExprError.throw('EndOfExpressionError', 'Unexpected end of expression')
       }
     }
-    const current = (tokens) => {
-      checkNotEndOfExpression(tokens)
+    const current = () => {
+      checkNotEndOfExpression()
       return tokens[0]
     }
-    const offset = (tokens) => current(tokens)[2]
-    const range = (tokensOrOp, from) => {
+    const offset = () => current()[2]
+    const range = (from, op) => {
       let currentRange
-      if (Array.isArray(tokensOrOp)) {
-        currentRange = current(tokensOrOp).splice(2)
+      if (op) {
+        currentRange = op.$[2]
       } else {
-        currentRange = tokensOrOp.$[2]
+        currentRange = current().splice(2)
       }
       const [offset, length] = currentRange
       return [from, offset + length - from]
     }
-    const shift = (tokens, steps = 1) => tokens.splice(0, steps)
-    const isSymbol = (tokens, expected = undefined) => {
+    const shift = (steps = 1) => tokens.splice(0, steps)
+    const isSymbol = (expected = undefined) => {
       if (tokens.length === 0) {
         return false
       }
       const [type, value] = tokens[0]
       return (type === TOKEN_TYPE_SYMBOL) && (!expected || expected.includes(value))
     }
-    const shiftOnSymbols = (tokens, expected) => {
+    const shiftOnSymbols = (expected) => {
       const nextSymbols = []
       for (const token of tokens) {
         const [type, value] = token
@@ -283,107 +288,114 @@
         .filter(symbol => nextSymbolsAggregated.startsWith(symbol))
         .sort((a, b) => b.length - a.length)[0]
       if (matching) {
-        shift(tokens, matching.length)
+        shift(matching.length)
         return matching
       }
       return false
     }
-    const unexpected = (tokens) => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset(tokens)}`, offset(tokens))
+    const unexpected = () => PunyExprError.throw('UnexpectedTokenError', `Unexpected token @${offset(tokens)}`, offset(tokens))
 
-    const arrayLiteral = (tokens) => {
-      const from = offset(tokens)
-      shift(tokens)
+    const arrayLiteral = () => {
+      const from = offset()
+      shift()
       const items = []
-      while (!isSymbol(tokens, ']')) {
-        const item = expression(tokens)
+      while (!isSymbol(']')) {
+        const item = expression()
         items.push(item)
-        if (isSymbol(tokens, ',')) { // accepts trailing comma
-          shift(tokens)
+        if (isSymbol(',')) { // accepts trailing comma
+          shift()
         }
       }
-      const arrayRange = range(tokens, from)
-      shift(tokens)
+      const arrayRange = range(from)
+      shift()
       return array(arrayRange, ...items)
     }
 
-    const primaryExpression = (tokens) => {
-      checkNotEndOfExpression(tokens)
-      if (isSymbol(tokens, '(')) {
-        shift(tokens)
-        const result = expression(tokens)
-        if (!isSymbol(tokens, ')')) {
-          unexpected(tokens)
+    const primaryExpression = () => {
+      checkNotEndOfExpression()
+      if (isSymbol('(')) {
+        shift()
+        const result = expression()
+        if (!isSymbol(')')) {
+          unexpected()
         }
-        shift(tokens)
+        shift()
         return result
       }
-      if (isSymbol(tokens, '[')) {
-        return arrayLiteral(tokens)
+      if (isSymbol('[')) {
+        return arrayLiteral()
       }
-      if (isSymbol(tokens)) {
-        unexpected(tokens)
+      if (isSymbol()) {
+        unexpected()
       }
-      const [[type, value, ...valueRange]] = shift(tokens)
+      const [[type, value, ...valueRange]] = shift()
       if (type === TOKEN_TYPE_IDENTIFIER) {
         return propertyOfContext(valueRange, constant(valueRange, value))
+      }
+      if (type === TOKEN_TYPE_REGEX) {
+        if (!options.regex) {
+          PunyExprError.throw('RegExpDisabledError', `Regular expressions are disabled @${offset()}`, offset())
+        }
+        const [source, flags] = value
+        return regex(valueRange, source, flags)
       }
       return constant(valueRange, value)
     }
 
-    const CallOrMemberExpression = (tokens) => {
-      const from = offset(tokens)
-      let result = primaryExpression(tokens)
+    const CallOrMemberExpression = () => {
+      const from = offset()
+      let result = primaryExpression()
       const operators = {
         '(': () => {
           const args = []
-          while (!isSymbol(tokens, ')')) {
+          while (!isSymbol(')')) {
             if (args.length > 0) {
-              if (!isSymbol(tokens, ',')) {
-                unexpected(tokens)
+              if (!isSymbol(',')) {
+                unexpected()
               }
-              shift(tokens)
+              shift()
             }
-            args.push(expression(tokens))
+            args.push(expression())
           }
-          const callRange = range(tokens, from)
-          shift(tokens)
+          const callRange = range(from)
+          shift()
           result = callFunction(callRange, result, args)
         },
         '[': () => {
-          const name = expression(tokens)
-          if (!isSymbol(tokens, ']')) {
-            unexpected(tokens)
+          const name = expression()
+          if (!isSymbol(']')) {
+            unexpected()
           }
-          const propertyRange = range(tokens, from)
-          shift(tokens)
+          const propertyRange = range(from)
+          shift()
           result = propertyOf(propertyRange, result, name)
         },
         '.': () => {
-          const [type, value, ...valueRange] = current(tokens)
+          const [type, value, ...valueRange] = current()
           if (type !== TOKEN_TYPE_IDENTIFIER) {
-            unexpected(tokens)
+            unexpected()
           }
-          const propertyRange = range(tokens, from)
-          shift(tokens)
+          const propertyRange = range(from)
+          shift()
           result = propertyOf(propertyRange, result, constant(valueRange, value))
         }
       }
-      while (isSymbol(tokens, '([.')) {
-        const [[, symbol]] = shift(tokens)
-        operators[symbol](result)
+      while (isSymbol('([.')) {
+        const [[, symbol]] = shift()
+        operators[symbol]()
       }
       return result
     }
 
-    const unaryExpression = (tokens) => {
-      const [type, value, from] = current(tokens)
-      const postProcess = isSymbol(tokens, '+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
+    const unaryExpression = () => {
+      const [type, value, from] = current()
+      const postProcess = isSymbol('+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
       if (!postProcess) {
-        return CallOrMemberExpression(tokens)
+        return CallOrMemberExpression()
       }
-      const unaryRange = range(tokens, from)
-      shift(tokens)
-      let result = expression(tokens)
+      const unaryRange = range(from)
+      shift()
+      let result = expression()
       // + is absorbed
       if (value === '-') {
         result = neg(unaryRange, result)
@@ -397,15 +409,15 @@
 
     const _recursiveExpression = (subExpression, operators) => {
       const expectedSymbols = Object.keys(operators)
-      return (tokens) => {
-        const from = offset(tokens)
-        let result = subExpression(tokens)
-        let symbol = shiftOnSymbols(tokens, expectedSymbols)
+      return () => {
+        const from = offset()
+        let result = subExpression()
+        let symbol = shiftOnSymbols(expectedSymbols)
         while (symbol) {
-          const sub = subExpression(tokens)
-          const recursiveRange = range(sub, from)
+          const sub = subExpression()
+          const recursiveRange = range(from, sub)
           result = operators[symbol](recursiveRange, result, sub)
-          symbol = shiftOnSymbols(tokens, expectedSymbols)
+          symbol = shiftOnSymbols(expectedSymbols)
         }
         return result
       }
@@ -448,18 +460,18 @@
       '||': or
     })
 
-    const conditionalExpression = (tokens) => {
-      const from = offset(tokens)
-      const condition = logicalORExpression(tokens)
-      if (shiftOnSymbols(tokens, ['?'])) {
-        const trueResult = conditionalExpression(tokens)
-        checkNotEndOfExpression(tokens)
-        if (!isSymbol(tokens, ':')) {
-          unexpected(tokens)
+    const conditionalExpression = () => {
+      const from = offset()
+      const condition = logicalORExpression()
+      if (shiftOnSymbols(['?'])) {
+        const trueResult = conditionalExpression()
+        checkNotEndOfExpression()
+        if (!isSymbol(':')) {
+          unexpected()
         }
-        shift(tokens)
-        const falseResult = conditionalExpression(tokens)
-        const conditionRange = range(falseResult, from)
+        shift()
+        const falseResult = conditionalExpression()
+        const conditionRange = range(from, falseResult)
         return ternary(conditionRange, condition, trueResult, falseResult)
       }
       return condition
@@ -467,10 +479,11 @@
 
     const expression = conditionalExpression
 
-    return (tokens) => {
-      const result = expression(tokens)
+    return (...args) => {
+      [tokens, options] = args
+      const result = expression()
       if (tokens.length !== 0) {
-        PunyExprError.throw('UnexpectedRemainderError', `Unexpected left over tokens @${offset(tokens)}`, offset(tokens))
+        PunyExprError.throw('UnexpectedRemainderError', `Unexpected left over tokens @${offset()}`, offset())
       }
       return result
     }
