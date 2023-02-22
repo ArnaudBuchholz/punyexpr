@@ -53,9 +53,9 @@ const safebind = punybind.use({
 const unsecure = punyexpr('value.match(/a+b/)', { regex: true })
 ```
 
-* See the [source](https://github.com/ArnaudBuchholz/punyexpr/blob/master/punyexpr.js) for the (altered and) implemented grammar,<br> in particular the following are not supported :
+* Check the [source](https://github.com/ArnaudBuchholz/punyexpr/blob/main/punyexpr.js) for the *(altered and)* implemented grammar,<br> in particular the following are not supported :
   * Bitwise, async and coalesce operations
   * `new` and `this`
   * Object literals
-* See the [tests](https://github.com/ArnaudBuchholz/punyexpr/blob/master/tests/expression.spec.js) for supported expressions.
+* See the [tests](https://github.com/ArnaudBuchholz/punyexpr/blob/main/tests/expression.spec.js) for supported expressions.
 * The implementation is **compliant** with [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
