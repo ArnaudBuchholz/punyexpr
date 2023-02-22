@@ -60,8 +60,9 @@ window.addEventListener('load', () => {
     location.hash = encodeURIComponent(input.innerText)
     output.innerHTML = ''
     treeRoot.innerHTML = ''
+    let expr
     try {
-      const expr = punyexpr(input.innerText)
+      expr = punyexpr(input.innerText)
       const result = expr({
         Math
       })
@@ -72,10 +73,13 @@ window.addEventListener('load', () => {
         output.appendChild(document.createTextNode(JSON.stringify(result)))
       }
       output.className = `output ${typeOfResult}`
-      toAst(treeRoot, expr.toJSON())
     } catch (e) {
       output.appendChild(document.createTextNode(e.toString()))
       output.className = 'output error'
+    } finally {
+      if (expr) {
+        toAst(treeRoot, expr.toJSON())
+      }
     }
   }
 
