@@ -12,6 +12,8 @@ describe('expression', () => {
       let label
       if (expected instanceof Error) {
         label = expected.name
+      } else if (typeof expected === 'function') {
+        label = '<custom validation>'
       } else {
         label = JSON.stringify(expected)
       }
@@ -55,7 +57,11 @@ describe('expression', () => {
           if (Array.isArray(result)) { // Looks like an array ?
             result = [].slice.call(result) // Convert to array
           }
-          expect(result).toStrictEqual(expected)
+          if (typeof expected === 'function') {
+            expected(result)
+          } else {
+            expect(result).toStrictEqual(expected)
+          }
         }
       })
     })
@@ -1535,6 +1541,70 @@ describe('expression', () => {
         }
       }, {}, {
         regex: true
+      })
+    })
+
+    describe('when custom', () => {
+      const buildRegEx = (pattern, flags) => {
+        const regex = new RegExp(pattern, flags)
+        regex.__custom__ = true
+        return regex
+      }
+
+      process({
+        '/abc/': {
+          expected: function (value) {
+            expect(value instanceof RegExp).toStrictEqual(true)
+            expect(value.__custom__).toStrictEqual(true)
+          },
+          json: {
+            op: 'regex',
+            at: 0,
+            length: 5,
+            args: [
+              'abc',
+              ''
+            ]
+          }
+        },
+        '"abc".match(/^abc$/)': {
+          expected: ['abc'],
+          json: {
+            op: 'call',
+            at: 0,
+            length: 20,
+            args: [{
+              op: 'property',
+              at: 0,
+              length: 11,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 5,
+                args: [
+                  'abc'
+                ]
+              }, {
+                op: 'constant',
+                at: 6,
+                length: 5,
+                args: [
+                  'match'
+                ]
+              }]
+            }, [{
+              op: 'regex',
+              at: 12,
+              length: 7,
+              args: [
+                '^abc$',
+                ''
+              ]
+            }]]
+          }
+        }
+      }, {}, {
+        regex: buildRegEx
       })
     })
   })
