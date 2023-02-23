@@ -1817,6 +1817,17 @@ describe('expression', () => {
     })
   })
 
+  describe.only('bugs', () => {
+    describe('#2', () => {
+      process({
+        '!qUnitPages || !qUnitPages["abc"]': {
+          expected: true,
+          verbose: true
+        }
+      })
+    })
+  })
+
   describe('error', () => {
     const error = (name, message, offset) => ({
       expected: new punyexpr.Error(name, message, offset)
