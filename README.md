@@ -10,7 +10,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-A minimalist *(⇡ check the install size)* expression compiler and evaluator.
+A minimalist *(4951 bytes)* expression compiler and evaluator.
 
 ## Live demo
 
@@ -47,10 +47,18 @@ const safebind = punybind.use({
 
 ## Implementation notes
 
-* Regular expressions are [not secure](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS), leverage the option `{ regex: true }` to enable them :
+* Regular expressions are [not secure](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS) and are not allowed by default
+
+* Leverage the option `{ regex: true }` to enable regular expressions using the default [JavaScript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp):
 
 ```javascript
 const unsecure = punyexpr('value.match(/a+b/)', { regex: true })
+```
+
+* Or plug any custom regular expression builder using `{ regex: (pattern, flags) => { /* */ } }`
+
+```javascript
+const unsecure = punyexpr('value.match(/a+b/)', { regex: (pattern, flags) => new RegExp(pattern, flags) })
 ```
 
 * Check the [source](https://github.com/ArnaudBuchholz/punyexpr/blob/main/punyexpr.js) for the *(altered and)* implemented grammar,<br> in particular the following are not supported :
