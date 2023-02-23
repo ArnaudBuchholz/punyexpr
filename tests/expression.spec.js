@@ -51,7 +51,11 @@ describe('expression', () => {
           if (json) {
             expect(exprAsJson).toStrictEqual(json)
           }
-          expect(expr(context)).toStrictEqual(expected)
+          let result = expr(context)
+          if (Array.isArray(result)) { // Looks like an array ?
+            result = [].slice.call(result) // Convert to array
+          }
+          expect(result).toStrictEqual(expected)
         }
       })
     })
@@ -1472,8 +1476,10 @@ describe('expression', () => {
 
   describe('regex', () => {
     describe('when not allowed', () => {
-      it('forbids usage of regular expressions by default', () => {
-        expect(() => punyexpr('/abc/')).toThrowError()
+      process({
+        '/abc/': {
+          expected: new punyexpr.Error('RegExpDisabledError', 'Regular expressions are disabled @0', 0)
+        }
       })
     })
 
@@ -1489,6 +1495,42 @@ describe('expression', () => {
               'abc',
               ''
             ]
+          }
+        },
+        '"abc".match(/^abc$/)': {
+          expected: ['abc'],
+          json: {
+            op: 'call',
+            at: 0,
+            length: 20,
+            args: [{
+              op: 'property',
+              at: 0,
+              length: 11,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 5,
+                args: [
+                  'abc'
+                ]
+              }, {
+                op: 'constant',
+                at: 6,
+                length: 5,
+                args: [
+                  'match'
+                ]
+              }]
+            }, [{
+              op: 'regex',
+              at: 12,
+              length: 7,
+              args: [
+                '^abc$',
+                ''
+              ]
+            }]]
           }
         }
       }, {}, {
