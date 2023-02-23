@@ -334,7 +334,8 @@
       }
       if (type === TOKEN_TYPE_REGEX) {
         if (!options.regex) {
-          PunyExprError.throw('RegExpDisabledError', `Regular expressions are disabled @${offset()}`, offset())
+          const [from] = valueRange
+          PunyExprError.throw('RegExpDisabledError', `Regular expressions are disabled @${from}`, from)
         }
         const [source, flags] = value
         return regex(valueRange, source, flags)
