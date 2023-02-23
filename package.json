@@ -12,7 +12,7 @@
     "test:minified": "jest --no-coverage --setupFilesAfterEnv ./tests/minified.js",
     "mutate": "stryker run",
     "lint": "standard --fix",
-    "build": "uglifyjs punyexpr.js --compress --mangle -o dist/punyexpr.js && node version",
+    "build": "uglifyjs punyexpr.js --compress --mangle -o dist/punyexpr.js && node version && node update-readme",
     "start": "reserve",
     "ci": "npm run test && npm run build && npm run test:minified"
   },
