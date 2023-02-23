@@ -104,6 +104,8 @@
     }
   })()
 
+  const OP_DETAILS = Symbol('punyexpr')
+
   const parse = (() => {
   /*
 
@@ -196,14 +198,15 @@
   Expression :
     ConditionalExpression
 */
-    const buildOp = (name, impl) => (range, ...args) => Object.assign(impl.bind(null, ...args), { $: [name, args, range] })
+    const buildOp = (name, impl) => (range, ...args) => Object.assign(impl.bind(null, ...args), { [OP_DETAILS]: [name, args, range] })
 
     const constant = buildOp('constant', value => value)
     const array = buildOp('array', (...itemsAndContext) => {
       const context = itemsAndContext[itemsAndContext.length - 1]
       return itemsAndContext.slice(0, -1).map(item => item(context))
     })
-    const regex = buildOp('regex', (source, flags) => new RegExp(source, flags))
+    const regex = buildOp('regex', (pattern, flags, builder) => builder(pattern, flags))
+    const regexDefaultBuilder = (pattern, flags) => new RegExp(pattern, flags)
     const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
     const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
@@ -259,7 +262,7 @@
     const range = (from, op) => {
       let currentRange
       if (op) {
-        currentRange = op.$[2]
+        currentRange = op[OP_DETAILS][2]
       } else {
         currentRange = current().splice(2)
       }
@@ -337,8 +340,13 @@
           const [from] = valueRange
           PunyExprError.throw('RegExpDisabledError', `Regular expressions are disabled @${from}`, from)
         }
-        const [source, flags] = value
-        return regex(valueRange, source, flags)
+        const [pattern, flags] = value
+        let builder = options.regex
+        // eslint-disable-next-line valid-typeof
+        if (typeof builder !== FUNCTION) {
+          builder = regexDefaultBuilder
+        }
+        return regex(valueRange, pattern, flags, builder)
       }
       return constant(valueRange, value)
     }
@@ -506,21 +514,27 @@
   }
 
   const toJSON = expr => {
-    const [op, args, [at, length]] = expr.$
+    const [op, args, [at, length]] = expr[OP_DETAILS]
+    const filtered = {}
     return {
       op,
       at,
       length,
-      args: args.map(arg => {
-        // eslint-disable-next-line valid-typeof
-        if (typeof arg === FUNCTION) {
-          return toJSON(arg)
-        }
-        if (Array.isArray(arg)) {
-          return arg.map(toJSON)
-        }
-        return arg
-      })
+      args: args
+        .map(arg => {
+          // eslint-disable-next-line valid-typeof
+          if (typeof arg === FUNCTION) {
+            if (arg[OP_DETAILS]) {
+              return toJSON(arg)
+            }
+            return filtered
+          }
+          if (Array.isArray(arg)) {
+            return arg.map(toJSON)
+          }
+          return arg
+        })
+        .filter(arg => arg !== filtered)
     }
   }
 
