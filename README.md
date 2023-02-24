@@ -10,7 +10,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-A minimalist *(4951 bytes)* expression compiler and evaluator.
+A minimalist *(4955 bytes)* expression compiler and evaluator.
 
 ## Live demo
 
