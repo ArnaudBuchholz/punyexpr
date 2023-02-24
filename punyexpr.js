@@ -104,6 +104,7 @@
     }
   })()
 
+  // Stryker disable next-line all
   const OP_DETAILS = Symbol('punyexpr')
 
   const parse = (() => {
