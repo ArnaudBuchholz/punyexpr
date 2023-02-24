@@ -1125,10 +1125,15 @@ describe('expression', () => {
       },
       '+1': {
         json: {
-          op: 'constant',
-          at: 1,
+          op: 'pos',
+          at: 0,
           length: 1,
-          args: [1]
+          args: [{
+            op: 'constant',
+            at: 1,
+            length: 1,
+            args: [1]
+          }]
         },
         expected: 1
       },
@@ -1818,6 +1823,44 @@ describe('expression', () => {
   })
 
   describe('bugs', () => {
+    describe('#1', () => {
+      process({
+        '1 + +"2" + "2"': {
+          expected: '32',
+          json: {
+            op: 'add',
+            at: 0,
+            length: 14,
+            args: [{
+              op: 'add',
+              at: 0,
+              length: 5,
+              args: [{
+                op: 'constant',
+                at: 0,
+                length: 1,
+                args: [1]
+              }, {
+                op: 'pos',
+                at: 4,
+                length: 1,
+                args: [{
+                  op: 'constant',
+                  at: 5,
+                  length: 3,
+                  args: ['2']
+                }]
+              }]
+            }, {
+              op: 'constant',
+              at: 11,
+              length: 3,
+              args: ['2']
+            }]
+          }
+        }
+      })
+    })
     describe('#2', () => {
       process({
         '!qUnitPages || !qUnitPages["abc"]': {
