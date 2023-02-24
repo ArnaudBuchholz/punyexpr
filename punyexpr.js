@@ -218,6 +218,7 @@
       return result
     })
     const callFunction = buildOp('call', (func, args, context) => func(context).apply(null, args.map(arg => arg(context))))
+    const pos = buildOp('pos', (value, context) => +value(context))
     const neg = buildOp('neg', (value, context) => -value(context))
     const not = buildOp('not', (value, context) => !value(context))
     const getTypeof = buildOp('getTypeof', (value, context) => typeof value(context))
@@ -396,6 +397,13 @@
       return result
     }
 
+    const unaryMapper = {
+      '+': pos,
+      '-': neg,
+      '!': not,
+      typeof: getTypeof
+    }
+
     const unaryExpression = () => {
       const [type, value, from] = current()
       const postProcess = isSymbol('+-!') || ((type === TOKEN_TYPE_IDENTIFIER) && value === 'typeof')
@@ -404,16 +412,8 @@
       }
       const unaryRange = range(from)
       shift()
-      let result = unaryExpression()
-      // + is absorbed
-      if (value === '-') {
-        result = neg(unaryRange, result)
-      } else if (value === '!') {
-        result = not(unaryRange, result)
-      } else if (value === 'typeof') {
-        result = getTypeof(unaryRange, result)
-      }
-      return result
+      const func = unaryMapper[value]
+      return func(unaryRange, unaryExpression())
     }
 
     const _recursiveExpression = (subExpression, operators) => {
