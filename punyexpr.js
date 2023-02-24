@@ -404,7 +404,7 @@
       }
       const unaryRange = range(from)
       shift()
-      let result = expression()
+      let result = unaryExpression()
       // + is absorbed
       if (value === '-') {
         result = neg(unaryRange, result)
