@@ -1817,12 +1817,57 @@ describe('expression', () => {
     })
   })
 
-  describe.only('bugs', () => {
+  describe('bugs', () => {
     describe('#2', () => {
       process({
         '!qUnitPages || !qUnitPages["abc"]': {
           expected: true,
-          verbose: true
+          json: {
+            op: 'or',
+            at: 0,
+            length: 16,
+            args: [{
+              op: 'not',
+              at: 0,
+              length: 1,
+              args: [{
+                op: 'context',
+                at: 1,
+                length: 10,
+                args: [{
+                  op: 'constant',
+                  at: 1,
+                  length: 10,
+                  args: ['qUnitPages']
+                }]
+              }]
+            }, {
+              op: 'not',
+              at: 15,
+              length: 1,
+              args: [{
+                op: 'property',
+                at: 16,
+                length: 17,
+                args: [{
+                  op: 'context',
+                  at: 16,
+                  length: 10,
+                  args: [{
+                    op: 'constant',
+                    at: 16,
+                    length: 10,
+                    args: ['qUnitPages']
+                  }]
+                }, {
+                  op: 'constant',
+                  at: 27,
+                  length: 5,
+                  args: ['abc']
+                }]
+              }]
+            }]
+          }
         }
       })
     })
