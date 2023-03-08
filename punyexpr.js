@@ -51,10 +51,12 @@
     const invalidTokenError = offset => PunyExprError.throw('InvalidTokenError', `Invalid token @${offset}`, offset)
 
     const IDENTIFIER_TO_LITERAL = {
-      true: true,
       false: false,
+      null: null,
+      true: true,
       undefined,
-      null: null
+      Infinity,
+      NaN
     }
 
     const TOKENIZER_CONVERTER = [
