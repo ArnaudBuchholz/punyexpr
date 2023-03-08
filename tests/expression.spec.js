@@ -1914,6 +1914,29 @@ describe('expression', () => {
         }
       })
     })
+    describe('#5', () => {
+      process({
+        'undefined + 1': {
+          expected: NaN,
+          json: {
+            op: 'add',
+            at: 0,
+            length: 13,
+            args: [{
+              op: 'constant',
+              at: 0,
+              length: 9,
+              args: [undefined]
+            }, {
+              op: 'constant',
+              at: 12,
+              length: 1,
+              args: [1]
+            }]
+          }
+        }
+      })
+    })
   })
 
   describe('error', () => {
