@@ -67,11 +67,15 @@ window.addEventListener('load', () => {
         Math
       })
       const typeOfResult = typeof result
+      let stringifiedResult
       if (typeOfResult === 'function') {
-        output.appendChild(document.createTextNode(result.toString()))
+        stringifiedResult = result.toString()
+      } else if (isNaN(result)) {
+        stringifiedResult = 'NaN'
       } else {
-        output.appendChild(document.createTextNode(JSON.stringify(result)))
+        stringifiedResult = JSON.stringify(result)
       }
+      output.appendChild(document.createTextNode(stringifiedResult))
       output.className = `output ${typeOfResult}`
     } catch (e) {
       output.appendChild(document.createTextNode(e.toString()))
