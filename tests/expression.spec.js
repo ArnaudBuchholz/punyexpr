@@ -1338,6 +1338,33 @@ describe('expression', () => {
           }]
         },
         expected: 1
+      },
+      undefined: {
+        expected: undefined,
+        json: {
+          op: 'constant',
+          at: 0,
+          length: 9,
+          args: [undefined]
+        }
+      },
+      NaN: {
+        expected: NaN,
+        json: {
+          op: 'constant',
+          at: 0,
+          length: 3,
+          args: [NaN]
+        }
+      },
+      Infinity: {
+        expected: Infinity,
+        json: {
+          op: 'constant',
+          at: 0,
+          length: 8,
+          args: [Infinity]
+        }
       }
     })
   })
