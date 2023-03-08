@@ -70,10 +70,13 @@ window.addEventListener('load', () => {
       let stringifiedResult
       if (typeOfResult === 'function') {
         stringifiedResult = result.toString()
-      } else if (isNaN(result)) {
-        stringifiedResult = 'NaN'
       } else {
         stringifiedResult = JSON.stringify(result)
+        if (stringifiedResult === 'null') {
+          if (isNaN(result)) {
+            stringifiedResult = 'NaN'
+          }
+        }
       }
       output.appendChild(document.createTextNode(stringifiedResult))
       output.className = `output ${typeOfResult}`
