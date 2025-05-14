@@ -1,7 +1,6 @@
 'use strict'
 
-const { punyexpr } = require('../punyexpr.js')
-global.punyexpr = punyexpr
+require('../punyexpr.js')
 global.expectedVersion = '0.0.0'
 
 require('./setup')
