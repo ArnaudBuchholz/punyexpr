@@ -561,4 +561,4 @@
   })
 
   exports.punyexpr = punyexpr
-}(this))
+}(globalThis))
