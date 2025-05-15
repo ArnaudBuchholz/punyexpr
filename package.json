@@ -1,8 +1,15 @@
 {
   "name": "punyexpr",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "A minimalist expression compiler and evaluator",
   "main": "dist/punyexpr.js",
+  "exports": {
+    ".": {
+      "require": "./dist/punyexpr.js",
+      "import": "./dist/punyexpr.js",
+      "types": "./dist/punyexpr.d.ts"
+    }
+  },  
   "types": "dist/punyexpr.d.ts",
   "files": [
     "dist/"
@@ -10,7 +17,7 @@
   "scripts": {
     "pretest": "rimraf .stryker-tmp",
     "test": "jest --setupFilesAfterEnv ./tests/source.js",
-    "test:minified": "jest --no-coverage --setupFilesAfterEnv ./tests/minified.js",
+    "test:minified": "jest --no-coverage --setupFilesAfterEnv ./tests/minified.js && node tests/integration.cjs && node tests/integration.mjs",
     "mutate": "stryker run",
     "lint": "standard --fix",
     "build": "uglifyjs punyexpr.js --compress --mangle -o dist/punyexpr.js && node version && node update-readme",
