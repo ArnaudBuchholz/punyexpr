@@ -1,4 +1,4 @@
-(function (exports) {
+(function () {
   'use strict'
 
   const TOKEN_TYPE_LITERAL = 'literal'
@@ -560,5 +560,5 @@
     version: '0.0.0'
   })
 
-  exports.punyexpr = punyexpr
-}(globalThis))
+  module.exports = { punyexpr }
+}())

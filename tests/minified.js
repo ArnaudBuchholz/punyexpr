@@ -1,6 +1,6 @@
 'use strict'
 
-require('../dist/punyexpr.js')
+global.punyexpr = require('../dist/punyexpr.js').punyexpr
 
 const { version } = require('../package.json')
 global.expectedVersion = version
