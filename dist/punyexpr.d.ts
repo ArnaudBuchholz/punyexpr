@@ -23,7 +23,7 @@ declare module 'punyexpr' {
   )
 
   type PunyExprFunction = {
-    (context: { [name in string]: any }): any
+    (context?: { [name in string]: any }): any
     toJSON(): PunyExprNode
     toString(): string
   }
