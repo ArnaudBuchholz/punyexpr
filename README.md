@@ -13,29 +13,21 @@
 
 ## 🍁 Overview
 
-A minimalist *(4931 bytes)* and safe expression compiler and evaluator.
+A minimalist *(4937 bytes)* and safe expression compiler and evaluator.
 
 ## 🖥️ Demo
 
 You can experiment with expressions [here](https://arnaudbuchholz.github.io/punyexpr/samples/calc.html).
 
-## 💿 How to install in Node
+## 💿 How to install
 
 * `npm install punyexpr`
 
-* `import 'punyexpr'` or `require('punyexpr')`
+* with ESM: `import { punyexpor } from 'punyexpr'`
 
-* `punyexpr` is added to [`globalThis`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis) to be *globally* available.
+* with CommonJS: `const { punyexpr } = require('punyexpr')`
 
 * [Types](https://github.com/ArnaudBuchholz/punyexpr/blob/main/dist/punyexpr.d.ts) are included in the package
-
-## 💿 How to install in a browser
-
-* Include the `punyexpr` helper
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/punyexpr/dist/punyexpr.js"></script>
-``` 
 
 ## 📚 Documentation
 
