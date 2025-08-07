@@ -10,11 +10,16 @@ declare module 'punyexpr' {
     offset: number
   }
 
-  type PunyExprNode = { at: number; length: number } & (
-    | { op: 'constant', args: [value: string | number | boolean] }
+  type PunyExprLocator = { at: number; length: number }
+  type PunyExprConstantOp = { op: 'constant', args: [value: string | number | boolean] }
+
+  type PunyExprConstant = PunyExprLocator & PunyExprConstantOp
+
+  type PunyExprNode = PunyExprLocator & (
+    | PunyExprConstantOp
     | { op: 'array', args: PunyExprNode[] }
     // TODO missing regex
-    | { op: 'context', args: [name: string] }
+    | { op: 'context', args: [name: PunyExprConstant] }
     | { op: 'property', args: [context: PunyExprNode, name: string] }
     | { op: 'call', args: [thisValue: PunyExprNode, args: PunyExprNode[]] }
     | { op: 'pos' | 'neg' | 'not' | 'getTypeof', args: [PunyExprNode] }
@@ -26,6 +31,7 @@ declare module 'punyexpr' {
     (context?: { [name in string]: any }): any
     toJSON(): PunyExprNode
     toString(): string
+    listContextualNames(): string[]
   }
 
   type PunyExpr = {
