@@ -1,6 +1,6 @@
 {
   "name": "punyexpr",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A minimalist expression compiler and evaluator",
   "main": "dist/punyexpr.js",
   "exports": {
@@ -9,7 +9,7 @@
       "import": "./dist/punyexpr.js",
       "types": "./dist/punyexpr.d.ts"
     }
-  },  
+  },
   "types": "dist/punyexpr.d.ts",
   "files": [
     "dist/"
@@ -22,7 +22,8 @@
     "lint": "standard --fix",
     "build": "uglifyjs punyexpr.js --compress --mangle -o dist/punyexpr.js && node version && node update-readme",
     "start": "reserve",
-    "ci": "npm run test && npm run build && npm run test:minified"
+    "ci": "npm run test && npm run build && npm run test:minified",
+    "update": "ncu -i --format group"
   },
   "repository": {
     "type": "git",
@@ -37,8 +38,9 @@
   "devDependencies": {
     "@stryker-mutator/core": "^9.0.1",
     "@stryker-mutator/jest-runner": "^9.0.1",
-    "jest": "^29.7.0",
-    "reserve": "^2.2.0",
+    "jest": "^30.0.5",
+    "npm-check-updates": "^18.0.2",
+    "reserve": "^2.3.3",
     "rimraf": "^6.0.1",
     "standard": "^17.1.2",
     "uglify-js": "^3.19.3"
