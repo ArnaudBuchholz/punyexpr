@@ -7,6 +7,8 @@
   const TOKEN_TYPE_SYMBOL = 'symbol'
   const FUNCTION = 'function'
 
+  const NODE_TYPE_CONTEXT = 'context'
+
   class PunyExprError extends Error {
     constructor (name, message, offset) {
       super(message)
@@ -210,7 +212,7 @@
     })
     const regex = buildOp('regex', (pattern, flags, builder) => builder(pattern, flags))
     const regexDefaultBuilder = (pattern, flags) => new RegExp(pattern, flags)
-    const propertyOfContext = buildOp('context', (name, context) => context[name(context)])
+    const propertyOfContext = buildOp(NODE_TYPE_CONTEXT, (name, context) => context[name(context)])
     const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
       const result = that[name(context)]
@@ -541,6 +543,17 @@
     }
   }
 
+  const listContextualNames = expr => {
+    const list = new Set()
+    JSON.stringify(toJSON(expr), (_, value) => {
+      if (value.op === NODE_TYPE_CONTEXT) {
+        list.add(value.args[0].args[0])
+      }
+      return value
+    })
+    return [...list.values()]
+  }
+
   const punyexpr = (str, options = {}) => {
     const impl = parse(tokenize(str), {
       regex: false,
@@ -549,7 +562,8 @@
     const expr = (context = {}) => impl(context)
     assignROProperties(expr, {
       toJSON: toJSON.bind(null, impl),
-      toString: () => str
+      toString: () => str,
+      listContextualNames: listContextualNames.bind(null, impl),
     })
     return expr
   }
