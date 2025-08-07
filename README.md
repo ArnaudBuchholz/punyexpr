@@ -13,7 +13,7 @@
 
 ## 🍁 Overview
 
-A minimalist *(4937 bytes)* and safe expression compiler and evaluator.
+A minimalist *(5085 bytes)* and safe expression compiler and evaluator.
 
 ## 🖥️ Demo
 
@@ -76,5 +76,6 @@ const unsecure = punyexpr('value.match(/a+b/)', { regex: (pattern, flags) => new
   * Bitwise, async and coalesce operations
   * `new` and `this`
   * Object literals
-* See the [tests](https://github.com/ArnaudBuchholz/punyexpr/blob/main/tests/expression.spec.js) for supported expressions.
+* See the [types definitions](https://github.com/ArnaudBuchholz/punyexpr/blob/main/dist/punyexpr.d.ts) for complete API,
+* See the [tests](https://github.com/ArnaudBuchholz/punyexpr/blob/main/tests/expression.spec.js) for supported expressions,
 * The implementation is **compliant** with [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
