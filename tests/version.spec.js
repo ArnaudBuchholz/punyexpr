@@ -6,6 +6,6 @@ describe('version', () => {
   })
 
   it('is readonly', () => {
-    expect(() => { punyexpr.version = 'test' }).toThrowError()
+    expect(() => { punyexpr.version = 'test' }).toThrow(TypeError)
   })
 })
