@@ -54,7 +54,7 @@ declare module 'punyexpr' {
      * @returns any
      * @default value[property]
      */
-    propertyOf: Symbol
+    propertyOf: symbol
   }
 
   const punyexpr: PunyExpr
