@@ -13,7 +13,7 @@
 
 ## 🍁 Overview
 
-A minimalist *(5085 bytes)* and safe expression compiler and evaluator.
+A minimalist *(5144 bytes)* and safe expression compiler and evaluator.
 
 ## 🖥️ Demo
 
@@ -41,7 +41,26 @@ const incValue = punyexpr('value + 1')
 
 ```javascript
 incValue({ value: 1 }) // 2
-``` 
+```
+
+### `punyexpr.propertyOf`
+
+Hook to change the way a property is obtained from a value.
+
+⚠️ Not used when a value is fetched from the context.
+
+```javascript
+// a does not exist in the context, a.b should fail
+punyexpr('a.b')({
+  [punyexpr.propertyOf]: (value, property) => {
+    // instead, we propagate the undefined value
+    if (value === undefined) {
+      return undefined
+    }
+    return value[property]
+  }
+}) // undefined
+```
 
 ### Use with [punybind](https://www.npmjs.com/package/punybind)@`>=1.2.0`
 

@@ -28,19 +28,33 @@ declare module 'punyexpr' {
   )
 
   type PunyExprFunction = {
+    /** Evaluate the expression with the given context */
     (context?: { [name in string]: any }): any
+    /** Returns the abstract syntax tree representation of the expression */
     toJSON(): PunyExprNode
+    /** Returns the normalized expression */
     toString(): string
+    /** Returns the list of contextual names used in the expression */
     listContextualNames(): string[]
   }
 
   type PunyExpr = {
+    /** Compiles the expression */
     (expression: string, options?: {
       regex: true | ((pattern: string, flags: string) => RegExp)
     }): PunyExprFunction
     Error: typeof PunyExprError
     version: string
+    /** Tokenizer */
     tokenize(expression: string): PunyExprToken[]
+    /**
+     * hook: (value: any, property: string) => any
+     * @param value: any
+     * @param property: string
+     * @returns any
+     * @default value[property]
+     */
+    propertyOf: Symbol
   }
 
   const punyexpr: PunyExpr
