@@ -5,6 +5,13 @@ on:
   release:
     types: [created]
 
+permissions:
+  actions: read
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
