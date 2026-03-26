@@ -9,6 +9,8 @@
 
   const NODE_TYPE_CONTEXT = 'context'
 
+  const HOOK_PROPERTY_OF = Symbol('propertyOf')
+
   class PunyExprError extends Error {
     constructor (name, message, offset) {
       super(message)
@@ -215,7 +217,8 @@
     const propertyOfContext = buildOp(NODE_TYPE_CONTEXT, (name, context) => context[name(context)])
     const propertyOf = buildOp('property', (object, name, context) => {
       const that = object(context)
-      const result = that[name(context)]
+      const hook = context[HOOK_PROPERTY_OF]
+      const result = hook ? hook(that, name(context)) : that[name(context)]
       // eslint-disable-next-line valid-typeof
       if (typeof result === FUNCTION) {
         return result.bind(that)
@@ -563,7 +566,7 @@
     assignROProperties(expr, {
       toJSON: toJSON.bind(null, impl),
       toString: () => str,
-      listContextualNames: listContextualNames.bind(null, impl),
+      listContextualNames: listContextualNames.bind(null, impl)
     })
     return expr
   }
@@ -571,7 +574,8 @@
   assignROProperties(punyexpr, {
     tokenize,
     Error: PunyExprError,
-    version: '0.0.0'
+    version: '0.0.0',
+    propertyOf: HOOK_PROPERTY_OF
   })
 
   module.exports = { punyexpr }
